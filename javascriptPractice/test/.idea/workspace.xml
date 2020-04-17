@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="4c6b3d2a-5181-4357-b170-8c1cd4c043a3" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="PackageJsonUpdateNotifier">
+    <dismissed value="$PROJECT_DIR$/package.json" />
+  </component>
+  <component name="ProjectId" id="1Z3SGMgqf253Q9IykcZCP53JkiA" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="nodejs_interpreter_path" value="$APPLICATION_CONFIG_DIR$/node/node-v12.13.1-win-x64/node" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="settings.nodejs" />
+  </component>
+  <component name="RunManager" selected="Node.js.bin\www">
+    <configuration name="index.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/test/public/index.html" useBuiltInWebServerPort="true">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JavaScript Debug.index.html" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4c6b3d2a-5181-4357-b170-8c1cd4c043a3" name="Default Changelist" comment="" />
+      <created>1584066187513</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1584066187513</updated>
+      <workItem from="1584066189400" duration="317000" />
+      <workItem from="1584076788619" duration="658000" />
+      <workItem from="1584083647710" duration="2363000" />
+      <workItem from="1584681676388" duration="221000" />
+      <workItem from="1584681907566" duration="8602000" />
+      <workItem from="1584692680453" duration="374000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state width="1364" height="206" key="GridCell.Tab.0.bottom" timestamp="1584691791430">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1364" height="206" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1584691791430" />
+    <state width="1364" height="206" key="GridCell.Tab.0.center" timestamp="1584691791430">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1364" height="206" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1584691791430" />
+    <state width="1364" height="206" key="GridCell.Tab.0.left" timestamp="1584691791430">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1364" height="206" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1584691791430" />
+    <state width="1364" height="206" key="GridCell.Tab.0.right" timestamp="1584691791430">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1364" height="206" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1584691791430" />
+    <state x="343" y="0" key="SettingsEditor" timestamp="1584066439284">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="343" y="0" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1584066439284" />
+    <state x="360" y="433" key="jetbrains.nodejs.interpreters-dialog" timestamp="1584066429309">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="360" y="433" key="jetbrains.nodejs.interpreters-dialog/0.0.1536.824@0.0.1536.824" timestamp="1584066429309" />
+  </component>
+</project>
