@@ -1,0 +1,61 @@
+//readlinePractice();
+processPractice()
+
+
+function readlinePractice()
+{
+    ///引入readline模組
+    let readline = require("readline");
+
+    ///利用process模組中的stdin和stdout建立I/O 接口
+    let r1 = readline.createInterface(process.stdin, process.stdout);
+    r1.setPrompt('Text>');
+    r1.prompt();
+
+    ///realine 的 line 方法
+    r1.on('line',function (line)
+    {
+        switch (line.trim()) //trim()刪除前後 "空白"
+        {
+            case 'A':
+                console.log("Aa");
+                break;
+            case 'B':
+                console.log("Bb");
+                break;
+            case "close": //呼叫close 方法
+                r1.close();
+
+            default:
+                console.log("No command!");
+                break;
+        }
+        r1.prompt();//恢復輸入監聽，開始下一次輸入的實作
+    });
+
+    r1.on('close', function () //close 方法的內容實作 ，'close'為readline模組中的方法
+    {
+        console.log("Exit!");
+        process.exit(0);//結束程式
+    });
+
+}
+
+function processPractice()//2020422 21:00 待理解
+{
+    // process.on('exit',function (code) {
+    //
+    // })
+
+    process.on('exit', function(code) { console.log(code) });
+    process.stdin.setEncoding('utf8');
+
+    process.stdout.write("......\n");
+    process.stdout.write("請輸入或退出");
+    process.stdin.on('data',(input)=>{
+        input = input.toString().trim();
+        if (['Y', 'y', 'YES', 'yes'].indexOf(input) > -1) ;
+        if (['N', 'n', 'NO', 'no'].indexOf(input) > -1) process.exit(0);
+    })
+}
+
