@@ -10,19 +10,19 @@ function setup()
 
 function draw()
 {
-    background(220,220,220);
-    noFill();
-    let r=50;
-    let x=200;
-    let y=200;
-    let count=0;
-
-    for (let i=0;i<4;i++)
-    {
-        ellipse(x,y,r);
-        r=r+20;
-        count++;
-    }
+    // background(220,220,220);
+    // noFill();
+    // let r=50;
+    // let x=200;
+    // let y=200;
+    // let count=0;
+    //
+    // for (let i=0;i<4;i++)
+    // {
+    //     ellipse(x,y,r);
+    //     r=r+20;
+    //     count++;
+    // }
     /////while實作
     //console.log(count);
     // while (count<4)
@@ -33,26 +33,26 @@ function draw()
     //     count++;
     // }
     ////測試p5 function
-//     //console.log("2");
-//    let circle = function (){
-//     background(220,220,220);
-//     onFill();
-//     let r=50;
-//     let x=200;
-//     let y=200;
-//     let count=0;
-//     console.log(count);
-//     while (count<4)
-//     {
-//         console.log(count);
-//         ellipse(x,y,r);
-//         r=r+20;
-//         count++;
+    //console.log("2");
+   let circle = function (){
+    background(220,220,220);
+    noFill();
+    let r=50;
+    let x=200;
+    let y=200;
+    let count=0;
+    //console.log(count);
+    while (count<4)
+    {
+        //console.log(count);
+        ellipse(x,y,r);
+        r=r+20;
+        count++;
 
-//     }
-//         circle();
-// }
+    }
 
+}
+    circle();
 }
 
 
