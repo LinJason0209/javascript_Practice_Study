@@ -67,6 +67,7 @@ function test()
     }
 
     let add5 = myadd(5);
+
     console.log(add5(2));
 }
 
