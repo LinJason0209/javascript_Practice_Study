@@ -1,6 +1,6 @@
 //readlinePractice();
-processPractice()
-
+//processPractice()
+test();
 
 function readlinePractice()
 {
@@ -57,5 +57,16 @@ function processPractice()//2020422 21:00 待理解
         if (['Y', 'y', 'YES', 'yes'].indexOf(input) > -1) ;
         if (['N', 'n', 'NO', 'no'].indexOf(input) > -1) process.exit(0);
     })
+}
+function test()
+{
+    let myadd = function(x)
+    {
+        return(function (y)
+        { return (x+y) })
+    }
+
+    let add5 = myadd(5);
+    console.log(add5(2));
 }
 
