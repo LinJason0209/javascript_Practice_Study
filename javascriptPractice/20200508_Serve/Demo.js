@@ -42,7 +42,6 @@ fs.readFile("one.json","utf-8",function (err,data) {//輸入值(被讀的檔案�
     console.log(JSON.parse(data));
 })
 //正確寫法: 寫完再讀
-const  fs = require("fs");//註冊檔案寫入事件處理
 fs.writeFile("one.json",JSON.stringify(one),function () {//先寫
     console.log("Success");
 
@@ -51,3 +50,11 @@ fs.writeFile("one.json",JSON.stringify(one),function () {//先寫
         console.log(JSON.parse(data));
     })
 })
+/////////////////自製模組測試/////////
+let add = require("./add");
+
+// console.log(add(1,2));
+let Calcolate = require("./add");
+let add2 = new Calcolate;
+
+ console.log(add2.add(3,4));
