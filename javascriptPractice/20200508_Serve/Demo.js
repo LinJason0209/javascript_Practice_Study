@@ -2,9 +2,11 @@
 // console.log(__dirname); //正在被執行的js檔所在目錄
 //console.log(__filename); //正在被執行的js檔名
 //const => 常數定義的宣告，意思是只能宣告一次不能被變動
+//__dirname，絕對路徑
 const EventEmitter =  require("events");//模組引入事件處理 require => 模組引入器
 const birthdayEvent = new EventEmitter();//創建事件物件
-birthdayEvent.on("birthday",function (name,age) {//觸發事件的接收端註冊 輸入值為(拋出事件的來源，接收後要做的事情)。PS: 接收端的註冊要在拋出的前面
+birthdayEvent.on("birthday",function (name,age) {//觸發事件的接收端註冊 輸入值為(拋出事件的來源，接收後要做的事情)。PS: 接收端的註冊要在拋出的前面。!!非同步程式設計!!
+                                                //註冊事件，先設置如果發生什麼事就做什麼
     console.log('give a present! '+name +age);
 })
 

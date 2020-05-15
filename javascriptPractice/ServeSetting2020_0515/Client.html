@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Client Draw</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const  socket = io();//匯入io函式庫
+
+        function onBtnClicked() {
+            let value = document.getElementById("color").value;//getElementById用來取得html中的 element e.g: <h1>，.value為抓取element中的value
+            console.log("Client.html:"+value);//browser端印出
+            socket.emit("directive",{//emit(揪出的事件代稱,丟出的內容)
+                x: Math.random()*1000%400,//圓中心在screen的x座標
+                y: Math.random()*1000%400,//圓中心在screen的y座標
+                r: Math.random()*1000%100,//圓半徑
+                c: value//在html client端選擇的顏色
+            });
+        }
+    </script>
+</head>
+<body>
+    請選擇您的代表色:<br>
+<input id="color" type="color" value="#000000"/>
+<button id="btn" onclick="onBtnClicked()">發射!</button> <!--onBtnClicked()，為實作onclick，按鈕按下後的反饋-->
+</body>
+</html>

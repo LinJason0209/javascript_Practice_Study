@@ -1,0 +1,8 @@
+{
+  "name": "ServeSetting2020_0515",
+  "version": "1.0.0",
+  "dependencies": {
+    "socket.io": "*",
+    "express": "*"
+  }
+}
