@@ -6,7 +6,7 @@ console.log("Sent");
 function setup() {
     createCanvas(400,400);//給予畫面畫布
     io().on("Screen",function (message) {//接收來自Server.js的emit資料
-        console.log("Screen.js"+message);
+        console.log("Screen.js"+message);//browser端印出
         x = message.x;//更改預設為client端數值
         y = message.y;
         r = message.r;

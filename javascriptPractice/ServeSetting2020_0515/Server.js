@@ -3,7 +3,7 @@ const app = express();//引入express函式(模組return的函式)，這部分�
 const http = require("http").Server(app);//引入http模組，走express伺服器架構
 const io = require("socket.io")(http);//引入socket.io介面函式，走http形式架構
 
-app.use(express.static(__dirname));//對client端開放的資料位置，__dirname指目前所在目錄，+"/Public"指定開放目錄
+app.use(express.static(__dirname+"/Public"));//對client端開放的資料位置，__dirname指目前所在目錄，+"/Public"指定開放目錄
 
 io.on("connection",function (socket) { //建立client端監測接收端，如監測到connection類型被client端丟出，則印出丟出的client id位置
     console.log("a client connected:"+socket.id);
