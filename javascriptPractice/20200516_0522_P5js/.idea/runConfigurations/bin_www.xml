@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="bin\www" type="NodeJSConfigurationType" path-to-js-file="bin/www" working-dir="$PROJECT_DIR$">
+  <configuration default="false" name="bin\www" type="NodeJSConfigurationType" path-to-js-file="$PROJECT_DIR$/../20200516_0522_P5js/bin/www" working-dir="$PROJECT_DIR$/../20200516_0522_P5js">
     <envs>
       <env name="DEBUG" value="20200516-p5js:*" />
     </envs>
