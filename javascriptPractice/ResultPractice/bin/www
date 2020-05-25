@@ -3,11 +3,23 @@
 /**
  * Module dependencies.
  */
-
 var app = require('../app');
 var debug = require('debug')('resultpractice:server');
 var http = require('http');
+const  io = require("socket.io")(http);//匯入socket.io
 
+/**
+ * socket.io Listen 
+ */
+io.on("connection",function (socket) { //建立client端監測接收端，如監測到connection類型被client端丟出，則印出丟出的client id位置
+  console.log("a client connected:"+socket.id);//印出Client端ID
+
+  socket.on("directive",function (message) {//印出client端丟出的資料，確認是否有收到
+    console.log(message);
+    
+    socket.broadcast.emit("Screen",message);//從client端接收到server端後，再傳至其他server端的程式做處理，這裡是把資料再傳給Screen.js中做處理
+  });
+})
 /**
  * Get port from environment and store in Express.
  */
@@ -28,6 +40,8 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+io.listen(server);// 開啟 Socket.IO 的 listener
 
 /**
  * Normalize a port into a number, string, or false.

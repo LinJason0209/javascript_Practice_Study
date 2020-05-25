@@ -1,13 +1,122 @@
 <html>
 
 <head>
-  <title>Express</title>
+  <!--Bootstrap-->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>SEXUALLY BULLYING</title>
   <link rel="stylesheet" href="/stylesheets/style.css">
+  <style type="text/css">
+    body {
+      background: #2A2A2A;
+      color: #f7f7f7;
+      font-family: 'Times New Roman',"微軟正黑體", sans-serif !important;
+    }
+    .jumbotron {
+      background: #8C8C8C;
+      color: white;
+      text-align: center;
+    }
+    .headline{
+      font-weight: bold;
+    }
+    .testColor{
+      background: #00B7FF;
+    }
+
+  </style>
 </head>
 
 <body>
-  <h1>Express</h1>
-  <p>Welcome to Express</p>
+  <div class="container-fluid">
+    <!--container-fluid -->
+    <div class="jumbotron">
+      <!--jumbotron-->
+      <div>
+        <h1 class="headline">SEXUALLY BULLYING !</h1>
+        <p class="headline">本網站宗旨在於: 透過線上互動的方式，讓體驗者經歷所謂網路上報復性性侵害事件的被害人的相關經歷，以及體會他可能的感受</p>
+      </div>
+      <div class="row justify-content-end align-items-end">
+        <div class="col-xl-4 mt-3">
+          <button class="btn btn-secondary col-xl-12" type="button" onclick="location.href='javascripts/Client.html'">相關連結</button>
+        </div>
+      </div>
+      <!--jumbotron-->
+    </div>
+
+
+    <div class="row">
+      <!--row for second section-->
+        <div class="col-xl-6"><!--請選擇體驗的方式 <div class="row my-1">上下間距，<div class="row mt-1">只有上間距，<div class="row mb-1">只有下間距 -->
+          <div class="row col-xl-12">
+            <h2 class="headline col-xl-12"> 請選擇體驗的方式</h2>
+          </div>
+          <div class="row col-xl-12">
+            <p class="headline col-xl-12"> 你可以是當事人，也可以是第三者，你可以是協助者，也可以是加害人 </p>
+          </div>
+          <div class="row col-xl-12">
+            <p class="headline col-xl-12"> 你也許會是位警察，但你會發現，現實比你所想的還殘酷</p>
+          </div>
+
+          <div class="row my-1 text-center"><!--確認體驗者角色 按鈕 -->
+            <div class="col-xl-4 justify-content-center ">
+              <h5 id="MemberJoin" class="headline"> 0/1 位體驗者</h5>
+              <input class="col-xl-10 btn btn-primary align-self-start" id="ClientButton" type="button" value="Join" onclick="addJoinMember()">
+            </div>
+            <div class="col-xl-4 justify-content-center">
+              <h5 id="MemberSup" class="headline">0/4 位協助者</h5>
+              <input class="col-xl-10 btn btn-primary align-self-end" id="ScreenButton" type="button" value="Support" onclick="addSubMember()">
+            </div>
+          </div>
+        </div>
+
+        <div class="row col-xl-6">
+          <!--輸入生日-->
+        </div>
+      <!--row for second section-->
+    </div>
+    <!--container-fluid -->
+  </div>
+
+
+  <!--javascript in this page -->
+  <script type="text/javascript">
+    let memberJoin =0;
+    let memberSup =0;
+
+    function addJoinMember() {//增加體驗人數
+      if(memberJoin<1)
+      {
+        memberJoin +=1;
+        document.getElementById("MemberJoin").innerHTML = memberJoin+"/1 位體驗者";
+      }
+    }
+
+    function addSubMember() {//增加協助人數
+      if(memberSup <= 3)
+      {
+        memberSup +=1;
+        document.getElementById("MemberSup").innerHTML = memberSup+"/4 位協助者";
+      }
+    }
+
+    function sentPage() {
+      if(memberJoin === 1)
+      {
+        location.href='javascripts/Screen.html';
+      }
+    }
+  </script>
+
+
+
+  <!--Bootstrap-->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+
 </body>
 
 </html>
