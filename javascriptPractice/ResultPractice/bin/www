@@ -6,20 +6,58 @@
 var app = require('../app');
 var debug = require('debug')('resultpractice:server');
 var http = require('http');
-const  io = require("socket.io")(http);//匯入socket.io
+const io = require("socket.io")(http);//匯入socket.io
 
 /**
  * socket.io Listen 
  */
 io.on("connection",function (socket) { //建立client端監測接收端，如監測到connection類型被client端丟出，則印出丟出的client id位置
-  console.log("a client connected:"+socket.id);//印出Client端ID
+  //console.log("a client connected:"+socket.id);//印出Client端ID
+  let ClientIP = socket.handshake.address;
+  //console.log("Client IP(www):"+ClientIP);//印出Client端IP
+  socket.broadcast.emit("ClientIP",ClientIP);//將IP傳給Client端
+
 
   socket.on("directive",function (message) {//印出client端丟出的資料，確認是否有收到
     console.log(message);
-    
     socket.broadcast.emit("Screen",message);//從client端接收到server端後，再傳至其他server端的程式做處理，這裡是把資料再傳給Screen.js中做處理
   });
-})
+});
+
+// /**
+//  * Deal with database fs/////////////////////存檔
+//  */
+// const fs = require("fs");
+// io.on("SaveClient",function (SaveClient) {//儲存來自體驗者的資訊
+//
+//   fs.writeFile("ClientData.json", JSON.stringify(SaveClient), function () {
+//     // console.log(" setClientIP(0)="+ SaveClientIP+" Save sucess !");//browser端印出
+//
+//
+//     fs.readFile("ClientData.json", "utf-8", function (err, data) {//讀檔
+//       if (err) throw err;
+//       console.log("LoadClient=" + JSON.parse(data));
+//       io.broadcast.emit("UpDate", JSON.parse(data));//再將更新的IP送出
+//     })
+//   })
+// })
+
+// socket.on("SaveSubClient",function (SaveSubClient) {//儲存來自協助者的資訊
+//   fs.appendFile("ClientData.json",JSON.stringify(SaveSubClient),function () {//補在後方，不覆蓋
+//
+//
+//     fs.readFile("ClientData.json","utf-8",function (err,data) {//讀檔
+//       if (err) throw err;
+//       console.log("LoadClientSub="+JSON.parse(data));
+//       io.broadcast.emit("UpDate",JSON.parse(data));//再將更新的Client資訊送出
+//     })
+//   })
+// })
+
+
+
+
+
 /**
  * Get port from environment and store in Express.
  */
