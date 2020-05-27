@@ -8,20 +8,102 @@ var debug = require('debug')('resultpractice:server');
 var http = require('http');
 const io = require("socket.io")(http);//匯入socket.io
 
+
+/**
+ * Save information from Client side.
+ */
+
+class saveClient {//www端儲存模板
+  constructor(IP,name) {
+    this.IP =IP;//本Client端IP
+    this.name = name;//本Client端用戶名
+    this.Join = 0;//體驗者人數
+    this.Sup = 0;//協助者人數
+    this.Index = 0;//物件包索引值
+    this.JoinClientIP = [];//檢查IP
+    this.JoinClientIPIndex = 0;//檢查IP索引
+  }
+}
+let serverClient = new saveClient("null","null");//建立www端物件來儲存接收資訊，可複寫
+
+////////////////////////www端與Client端分開存取方便對比避免遺失，若Client端重整後可更新為最新版本//////////
+
+let serverClientBase =[];//分開儲存serveClient物件
+let serverClientBaseIndex = 0;//分開儲存serveClient物件的索引
+
+let saveClientIP = [];//www端檢查IP
+let saveIPIndex = 0;//www端檢查IP索引
+
+////////////////////////////////////////////////確認連線、IP獲取/////////////////////////////////
 /**
  * socket.io Listen 
  */
 io.on("connection",function (socket) { //建立client端監測接收端，如監測到connection類型被client端丟出，則印出丟出的client id位置
-  //console.log("a client connected:"+socket.id);//印出Client端ID
-  let ClientIP = socket.handshake.address;
-  //console.log("Client IP(www):"+ClientIP);//印出Client端IP
+  let ClientIP = socket.handshake.address;//取得要求連線之IP位置
   socket.broadcast.emit("ClientIP",ClientIP);//將IP傳給Client端
+  console.log("New Connect Success! New ClientIP = "+ClientIP);
 
-
-  socket.on("directive",function (message) {//印出client端丟出的資料，確認是否有收到
-    console.log(message);
-    socket.broadcast.emit("Screen",message);//從client端接收到server端後，再傳至其他server端的程式做處理，這裡是把資料再傳給Screen.js中做處理
+/////////////////////////////////////////Data Reset///////////////////////////////////
+  let resetServerClient;
+  socket.on("ThisClient",function (ThisClient) {
+    resetServerClient = ThisClient;
+    resetClient();
   });
+  /////////////////////////////////////////Data對比更新/////////////////////////////////////////
+  socket.on("JoinAdd",function (JoinAdd) {//接收Client端Data更新
+    if(saveClientIP.find(checkIP) === undefined)//若www的IP庫中未有JoinAdd.IP中的IP位置則新增並更新www端的IP庫
+    {
+      serverClient = JoinAdd;//將接收的物件用www端物件存取
+      serverClientBase[serverClientBaseIndex] = serverClient;//將物件分類存取
+      serverClientBase.Index = serverClientBaseIndex;//將儲存位置的索引在www端紀錄下來
+      // serverClient.Index = serverClientBaseIndex;//將儲存位置的索引紀錄下來
+      saveClientIP[saveIPIndex] = JoinAdd.IP;//更新www端IP庫
+      saveIPIndex+=1;
+      serverClientBaseIndex+=1;
+
+      serverClient.JoinClientIP = saveClientIP;//同步Client端IP庫
+      serverClient.JoinClientIPIndex = saveIPIndex;//同步Client端IP庫索引
+    }
+
+    socket.broadcast.emit("UpData",serverClient);
+    console.log("www Database Emit= "+serverClient);
+
+    function checkIP(element) {
+      return element === JoinAdd.IP;
+    }
+  });
+
+  function checkObject(element) {
+    return element.IP === resetServerClient;
+  }
+  function searchIndex(element) {//使用IP來尋找資料索引
+    if(element.IP === serverClient.IP)
+    {
+      return element.Index;
+    }
+  }
+
+
+  // serverClient = JoinAdd;
+  function resetClient() {
+    if(serverClientBase.find(checkObject) !== undefined)//如果IP存在，視為Client端reset
+    {
+      let resetClientIndex =  serverClientBase.forEach(searchIndex);//取得此IP資料所在的索引位置
+      serverClientBase[resetClientIndex].Join = serverClientBase[serverClientBase.length].Join;
+      serverClientBase[resetClientIndex].Sup = serverClientBase[serverClientBase.length].Sup;
+      serverClientBase[resetClientIndex].JoinClientIP = serverClientBase[serverClientBase.length].JoinClientIP;
+      serverClientBase[resetClientIndex].JoinClientIPIndex = serverClientBase[serverClientBase.length].JoinClientIPIndex;
+
+      socket.broadcast.emit("Reset",serverClientBase[resetClientIndex]);
+      console.log("www Reset Emit = "+serverClientBase[resetClientIndex]);
+    }
+  }
+
+
+  // socket.on("directive",function (message) {//印出client端丟出的資料，確認是否有收到
+  //   console.log(message);
+  //   socket.broadcast.emit("Screen",message);//從client端接收到server端後，再傳至其他server端的程式做處理，這裡是把資料再傳給Screen.js中做處理
+  // });
 });
 
 // /**
@@ -53,8 +135,6 @@ io.on("connection",function (socket) { //建立client端監測接收端，如監
 //     })
 //   })
 // })
-
-
 
 
 
