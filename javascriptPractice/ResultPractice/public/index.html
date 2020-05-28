@@ -65,11 +65,11 @@
           <div class="row my-1 text-center"><!--確認體驗者角色 按鈕 -->
             <div class="col-xl-4 justify-content-center ">
               <h5 id="MemberJoin" class="headline"> 0/1 位體驗者</h5>
-              <input class="col-xl-10 btn btn-primary align-self-start" id="ClientButton" type="button" value="Join" onclick="addJoinMember()">
+              <button class="col-xl-10 btn btn-primary align-self-start" type="button"  onclick="addJoinMember()">Join</button>
             </div>
             <div class="col-xl-4 justify-content-center">
               <h5 id="MemberSup" class="headline">0/4 位協助者</h5>
-              <input class="col-xl-10 btn btn-primary align-self-end" id="ScreenButton" type="button" value="Support" onclick="addSubMember()">
+              <button class="col-xl-10 btn btn-primary align-self-end"  type="button"  onclick="addSubMember()">Support</button>
             </div>
           </div>
         </div>
@@ -85,243 +85,72 @@
 
   <!--javascript in this page -->
   <script src="/socket.io/socket.io.js"></script>
-  <script>const  socket = io();//匯入io函式庫</script>
   <script>
+    const  socket = io();//匯入io函式庫
     class Client {//Client端儲存模板
       constructor(IP,name) {
         this.IP =IP;//本Client端IP
         this.name = name;//本Client端用戶名
         this.Join = 0;//體驗者人數
         this.Sup = 0;//協助者人數
-        // this.Index = 0;//物件包索引值
-        this.JoinClientIP = [];//檢查IP
-        this.JoinClientIPIndex = 0;//檢查IP索引
+        this.joinlock = false;//本Client端是否已經join
+        this.catchIndex = 0;//取物索引
       }
     }
-    let localClient = new Client("null","null");//建立本Client端物件來儲存相關資訊
-    console.log("Initialize = "+localClient);
+    let localClient = new Client();//建立本Client端物件來儲存相關資訊
+    ////////////////////////////////連接時同步www端資料/////////////
+    io().on("Set",function (ClientIP,saveBase,catchIndex) {
+      localClient.Join = saveBase.Join;
+      localClient.Sup = saveBase.Sup;
+      localClient.catchIndex = catchIndex;
+      localClient.joinlock = saveBase.joinlock[catchIndex];
 
-    ////////////////////////////////同步www端資料/////////////
-    socket.on("UpData",function (UpData) {
+      if(localClient.IP === undefined)
+      {
+        localClient.IP = ClientIP;
+        console.log("IP:"+ClientIP)
+      }
+      document.getElementById("MemberJoin").innerHTML = localClient.Join+"/1 位體驗者";
+      document.getElementById("MemberSup").innerHTML = localClient.Sup+"/4 位協助者";
+      console.log(localClient);
+    })
+    ////////////////////////////////有Client端commit時同步www端資料/////////////
+    io().on("UpData",function (UpData) {
       localClient.Join = UpData.Join;
       localClient.Sup = UpData.Sup;
-      localClient.JoinClientIP = UpData.JoinClientIP;
-      localClient.JoinClientIPIndex = UpData.JoinClientIPIndex;
 
-      console.log("Load Client Data = "+localClient);
+      document.getElementById("MemberJoin").innerHTML = localClient.Join+"/1 位體驗者";
+      document.getElementById("MemberSup").innerHTML = localClient.Sup+"/4 位協助者";
+      console.log("IP:"+localClient.IP)
+      console.log(localClient);
     })
 
-  ////////////////////////////////  全Client端/////////////////////////////////
-  //   socket.on("JoinAdd",function (JoinAdd) {//全Client更新Join值
-  //     document.getElementById("MemberJoin").innerHTML = JoinAdd+"/1 位體驗者";
-  //     memberJoin =JoinAdd;
-  //     console.log("Join="+memberJoin);
-  //   })
-  //
-  //   socket.on("SupAdd",function (SupAdd) {//全Client更新Sup值
-  //     document.getElementById("MemberSup").innerHTML = SupAdd+"/4 位協助者";
-  //     memberSup = SupAdd;
-  //     console.log("Sup="+memberSup)
-  //   })
-  //
-  //   socket.on("JoinClientIPAdd",function (JoinClientIPAdd) {
-  //     JoinClientIP[supClientIPIndex]=JoinClientIPAdd;//全Client更新ClientIP值
-  //     supClientIPIndex++;////全Client更新supIPIndex值
-  //     console.log("JoinClientIP="+JoinClientIP)
-  //   })
-/////////////////////////////////本Client端/////////////////////////////////////
+
     function addJoinMember()//本Client端Join按下後更新
     {
-      socket.on("ClientIP",function (ClientIP)
+      if(localClient.joinlock === false)
       {
-        console.log("in="+ClientIP);
-      });
-
-      socket.emit("ThisClient",localClient.IP);//告訴www目前處理的Client端
-
-      socket.on("ClientIP",function (ClientIP) {//收到連線IP
-        console.log("in="+localClient.JoinClientIP.find(checkIP));
-        if(localClient.JoinClientIP.find(checkIP) === undefined)//到本Client端的LocalClient物件確認新加入的IP是否已存在
-        {
-          localClient.IP = ClientIP;//更新本Client端IP值
-          localClient.Join +=1;//更新本Client端Join值
-          localClient.JoinClientIP[localClient.JoinClientIPIndex] = ClientIP;//更新本Client端IP檢查值
-          // socket.emit("JoinAdd",localClient);//送出Join更新值給www端
-          socket.emit("JoinAdd",localClient);//送出Join更新值給www端，因本Client端已更新故可在www端被複寫
-        console.log("Client New Data = "+localClient);
-        }
-        else//如果IP重複就更新狀態為最新
-        {
-          socket.on("Reset",function (Reset) {
-            localClient = Reset;
-            console.log("Client Reset Data = "+localClient);
-          })
-        }
-        function checkIP(element) {
-          return element === ClientIP;
-        }
-
-      })
+        localClient.Join +=1;//更新本Client端Join值
+        localClient.joinlock = true;
+        socket.emit("JoinAdd",localClient);//送出Join更新值給www端，因本Client端已更新故可在www端被複寫
+        document.getElementById("MemberJoin").innerHTML = localClient.Join+"/1 位體驗者";
+      }
     }
+
+
+
     function addSubMember()//本Client端Support按下後更新
     {
-      socket.emit("ThisClient",localClient.IP);//告訴www目前處理的Client端
-      socket.on("ClientIP",function (ClientIP) {//收到連線IP
-        if(localClient.JoinClientIP.find(checkIP) === undefined)
-        {
-          localClient.IP = ClientIP;//更新本Client端IP值
-          localClient.Sup +=1;//更新本Client端Sup值
-          localClient.JoinClientIP[localClient.JoinClientIPIndex] = ClientIP;//更新本Client端IP檢查值
-          // socket.emit("JoinAdd",localClient);//送出Join更新值給www端，因本Client端已更新故可在www端被複寫
-          socket.emit("JoinAdd",localClient);//送出Join更新值給www端，因本Client端已更新故可在www端被複寫
-          console.log("Client New Data = "+localClient);
-        }
-        else//如果IP重複就更新狀態為最新
-        {
-          socket.on("Reset",function (Reset) {
-            localClient = Reset;
-            console.log("Client Reset Data = "+localClient);
-          })
-        }
-        function checkIP(element) {
-          return element === ClientIP;
-        }
-      })
+      if(localClient.joinlock === false)
+      {
+        localClient.Sup +=1;//更新本Client端Sup值
+        localClient.joinlock = true;
+        socket.emit("JoinAdd",localClient);//送出Join更新值給www端，因本Client端已更新故可在www端被複寫
+        document.getElementById("MemberSup").innerHTML = localClient.Sup+"/4 位協助者";
+      }
     }
-   // function addSubMember()//本Client端Support按下後更新(1.0.1)
-    //{
-      // socket.on("ClientIP",function (ClientIP) {//收到連線IP
-      //   if(JoinClientIP.find(checkIP) === undefined)
-      //   {
-      //     memberSup+=1;//更新本Client端Sup值
-      //     socket.broadcast.emit("SupAdd",memberSup);//送出Sup更新值給全Client端
-      //     JoinClientIP[supClientIPIndex] = ClientIP;//新增本Client端supIP
-      //     socket.broadcast.emit("JoinClientIPAdd",JoinClientIP[supClientIPIndex]);//送出JoinClientIPAdd更新值給全Client端
-      //   }
-      //   function checkIP(element) {
-      //     return element === ClientIP;
-      //   }
-      // });
-   // }////
-
-
   </script>
-  <!--Json存取法(0.0.1)-->
-<!--  <script>-->
 
-<!--//    let memberJoin =0;//體驗者人數-->
-<!--//    let memberSup =0;//協助者人數-->
-<!--//    let tempIP;//暫存 IP 位置做參與者對比，一個設備只能參加一次-->
-<!--//    let setClientIP = [];//本Client端儲存的參與者IP-->
-<!--//    let saveClient = [];//暫存要儲存的資料，會因不同Client端或來源而被洗掉-->
-<!--//    //let setClientIPIndex = 1;//協助者資訊儲存起始索引，因為體驗者資訊用掉前面的位置-->
-<!--//-->
-<!--//    // function draw()-->
-<!--//    // {-->
-<!--//    //   document.getElementById("MemberJoin").innerHTML = memberJoin+"/1 位體驗者";//預設值-->
-<!--//    //   document.getElementById("MemberSup").innerHTML = memberSup+"/4 位協助者";-->
-<!--//    // }-->
-<!--//    //let index=0;-->
-<!--//    socket.on("UpDate",function (UpDate) {-->
-<!--//      //memberJoin = UpDate[1]; //更新全Client端的memberJoin的值//JoinIndex下一個值-->
-<!--//      memberJoin = UpDate.find(joinIndex);//更新全Client端的memberJoin的值//找到Join-->
-<!--//      if(memberJoin === "Join")-->
-<!--//      {-->
-<!--//        memberJoin = 1;-->
-<!--//      }-->
-<!--//      console.log("memberJoin="+memberJoin);-->
-<!--//      function joinIndex(element)-->
-<!--//      {-->
-<!--//        if(element === "Join")-->
-<!--//        {-->
-<!--//          return 1;-->
-<!--//        }-->
-<!--//      }-->
-<!--//-->
-<!--//      //memberSup = UpDate[2]; //更新全Client端的memberSup的值-->
-<!--//      let  supTemp =0;-->
-<!--//      UpDate.forEach(supIndex); //更新全Client端的memberSup的值-->
-<!--//      memberSup = supTemp;-->
-<!--//      console.log("supTemp="+supTemp);-->
-<!--//      function supIndex (element)-->
-<!--//      {-->
-<!--//        if(typeof element === "number")-->
-<!--//        {-->
-<!--//          if(supTemp < element)-->
-<!--//          {-->
-<!--//            supTemp = element;-->
-<!--//          }-->
-<!--//        }-->
-<!--//      }-->
-<!--//-->
-<!--//      setClientIP = UpDate.map(function (element) {//更新全Client端的IP的值-->
-<!--//        if( typeof element === "string")-->
-<!--//        {-->
-<!--//          return element;-->
-<!--//        }-->
-<!--//      });-->
-<!--//-->
-<!--//      document.getElementById("MemberJoin").innerHTML = memberJoin+"/1 位體驗者";//更新值-->
-<!--//      document.getElementById("MemberSup").innerHTML = memberSup+"/4 位協助者";-->
-<!--//      console.log("setClientIP="+setClientIP);-->
-<!--//      // UpDate.forEach(upIPData);-->
-<!--//      // function upIPData(element) {-->
-<!--//      //   if(typeof element === "string")-->
-<!--//      //   {-->
-<!--//      //     setClientIP[index] = element;-->
-<!--//      //     console.log("UpDate="+element);-->
-<!--//      //     index++;-->
-<!--//      //   }-->
-<!--//      // }-->
-<!--//      //index =0;//索引歸零-->
-<!--//    });-->
-<!--//-->
-<!--//-->
-<!--//    function addJoinMember() {//增加體驗人數 html Join onclick()-->
-<!--//      socket.on("ClientIP",function (ClientIP) {//接收來自www.js的emit資料-->
-<!--//        tempIP = ClientIP;//將接收的 IP 暫存起來，送到checkIP做身分比對-->
-<!--//        if( setClientIP.find(checkIP) === undefined)//尋找是否已使用-->
-<!--//        {-->
-<!--//          saveClient = [ClientIP,"Join"];-->
-<!--//          console.log("JoinClientSave");-->
-<!--//          socket.emit("SaveClient",saveClient);//發給www做Client資料存檔-->
-<!--//         // setClientIP[0] = ClientIP;//將IP存下，故意將0號位留給體驗者的IP-->
-<!--//          //memberJoin +=1;//本Client端的memberJoin值增加-->
-<!--//         // document.getElementById("MemberJoin").innerHTML = memberJoin+"/1 位體驗者";-->
-<!--//          //socket.emit("AddJoinCount",memberJoin);//發給www做體驗人數存檔-->
-<!--//        }-->
-<!--//      });-->
-<!--//    }-->
-<!--//-->
-<!--//    function addSubMember() {//增加協助人數 html sub onclick()-->
-<!--//      socket.on("ClientIP",function (ClientIP) {//ClientIP真的只有IP!!-->
-<!--//        tempIP = ClientIP;//將接收的 IP 暫存起來-->
-<!--//        if(memberSup <= 3 && setClientIP.find(checkIP) === undefined)-->
-<!--//        {-->
-<!--//          memberSup +=1;//本Client端的memberSup值增加-->
-<!--//          saveClient = [ClientIP,memberSup];-->
-<!--//          console.log("SubClientSave");-->
-<!--//          socket.emit("SaveSubClient",saveClient);//發給www做Client資料存檔-->
-<!--//          // setClientIP[setClientIPIndex] = ClientIP;//將IP記下-->
-<!--//          // setClientIPIndex += 1;-->
-<!--//          //console.log(" setClientIP(Sub)"+ setClientIP[setClientIPIndex-1]);//browser端印出-->
-<!--//          //document.getElementById("MemberSup").innerHTML = memberSup+"/4 位協助者";-->
-<!--//        }-->
-<!--//      })-->
-<!--//    }-->
-<!--//-->
-<!--//    function sentPage() {-->
-<!--//      if(memberJoin === 1)-->
-<!--//      {-->
-<!--//        location.href='Screen.html';-->
-<!--//      }-->
-<!--//    }-->
-<!--//-->
-<!--//    function checkIP(IP) {-->
-<!--//      return IP === tempIP;-->
-<!--//    }-->
-
-<!--  </script>-->
   <!--Bootstrap-->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>

@@ -13,128 +13,66 @@ const io = require("socket.io")(http);//匯入socket.io
  * Save information from Client side.
  */
 
-class saveClient {//www端儲存模板
-  constructor(IP,name) {
-    this.IP =IP;//本Client端IP
-    this.name = name;//本Client端用戶名
+class saveClient {}//www端接收模板
+
+class saveServer{//www端儲存庫模板
+  constructor() {
+    this.IP = [];//不可覆寫
     this.Join = 0;//體驗者人數
     this.Sup = 0;//協助者人數
-    this.Index = 0;//物件包索引值
-    this.JoinClientIP = [];//檢查IP
-    this.JoinClientIPIndex = 0;//檢查IP索引
+    this.joinlock = [];//不可覆寫
   }
 }
-let serverClient = new saveClient("null","null");//建立www端物件來儲存接收資訊，可複寫
-
-////////////////////////www端與Client端分開存取方便對比避免遺失，若Client端重整後可更新為最新版本//////////
-
-let serverClientBase =[];//分開儲存serveClient物件
-let serverClientBaseIndex = 0;//分開儲存serveClient物件的索引
-
-let saveClientIP = [];//www端檢查IP
-let saveIPIndex = 0;//www端檢查IP索引
-
+let serverClient = new saveClient();//建立www端物件來儲存接收資訊，可覆寫
+let saveBase= new saveServer();//www端儲存最新版
+let IPIndex = 0;
+let catchIndex = 0;
 ////////////////////////////////////////////////確認連線、IP獲取/////////////////////////////////
 /**
  * socket.io Listen 
  */
-io.on("connection",function (socket) { //建立client端監測接收端，如監測到connection類型被client端丟出，則印出丟出的client id位置
+io.on("connection",function (socket) {
+  //建立client端監測接收端，如監測到connection類型被client端丟出，則印出丟出的client IP
+  /////////////////////////////////////////////初始化///////////////////////////////////////////
   let ClientIP = socket.handshake.address;//取得要求連線之IP位置
-  socket.broadcast.emit("ClientIP",ClientIP);//將IP傳給Client端
-  console.log("New Connect Success! New ClientIP = "+ClientIP);
+  if(saveBase.IP.find(checkIP)===undefined)//如果IP庫不存在此IP，則存入IP庫
+  {
+    saveBase.IP[IPIndex] = ClientIP;
+    catchIndex = IPIndex;//此Client端的IP位置視為存取位置
+    saveBase.joinlock[catchIndex] = false;
+    IPIndex+=1;
+    console.log("New Connect Success! New ClientIP: "+ClientIP);
+  }
+  else//如果IP存在則視為此Client端為重新連線
+  {
+    catchIndex = saveBase.IP.indexOf(ClientIP);//此Client端的取物索引
+  }
+  socket.emit("Set",ClientIP,saveBase,catchIndex);//將IP、www端資料傳給Client端
+  // console.log("set: "+catchIndex)
 
-/////////////////////////////////////////Data Reset///////////////////////////////////
-  let resetServerClient;
-  socket.on("ThisClient",function (ThisClient) {
-    resetServerClient = ThisClient;
-    resetClient();
-  });
+  function checkIP(element)
+  {
+    return  element === ClientIP;
+  }
+
   /////////////////////////////////////////Data對比更新/////////////////////////////////////////
-  socket.on("JoinAdd",function (JoinAdd) {//接收Client端Data更新
-    if(saveClientIP.find(checkIP) === undefined)//若www的IP庫中未有JoinAdd.IP中的IP位置則新增並更新www端的IP庫
-    {
+    socket.on("JoinAdd",function (JoinAdd) {//接收Client端Data更新
+
       serverClient = JoinAdd;//將接收的物件用www端物件存取
-      serverClientBase[serverClientBaseIndex] = serverClient;//將物件分類存取
-      serverClientBase.Index = serverClientBaseIndex;//將儲存位置的索引在www端紀錄下來
-      // serverClient.Index = serverClientBaseIndex;//將儲存位置的索引紀錄下來
-      saveClientIP[saveIPIndex] = JoinAdd.IP;//更新www端IP庫
-      saveIPIndex+=1;
-      serverClientBaseIndex+=1;
 
-      serverClient.JoinClientIP = saveClientIP;//同步Client端IP庫
-      serverClient.JoinClientIPIndex = saveIPIndex;//同步Client端IP庫索引
-    }
+  ///////////////////////////////////////////更新www端更新///////////////////////////////////
+      saveBase.Join = serverClient.Join;//更新www端Join值
+      saveBase.Sup = serverClient.Sup;//更新www端Sup值
+      catchIndex = saveBase.IP.indexOf(ClientIP);
+      saveBase.joinlock[catchIndex] = serverClient.joinlock;//此Client端的lock存放位置跟IP的索引一樣
 
-    socket.broadcast.emit("UpData",serverClient);
-    console.log("www Database Emit= "+serverClient);
-
-    function checkIP(element) {
-      return element === JoinAdd.IP;
-    }
+      socket.broadcast.emit("UpData", serverClient);
+      console.log("www Database SaveBase: "+" catchIndex:"+catchIndex);
+      console.log(saveBase);
+    });
   });
 
-  function checkObject(element) {
-    return element.IP === resetServerClient;
-  }
-  function searchIndex(element) {//使用IP來尋找資料索引
-    if(element.IP === serverClient.IP)
-    {
-      return element.Index;
-    }
-  }
 
-
-  // serverClient = JoinAdd;
-  function resetClient() {
-    if(serverClientBase.find(checkObject) !== undefined)//如果IP存在，視為Client端reset
-    {
-      let resetClientIndex =  serverClientBase.forEach(searchIndex);//取得此IP資料所在的索引位置
-      serverClientBase[resetClientIndex].Join = serverClientBase[serverClientBase.length].Join;
-      serverClientBase[resetClientIndex].Sup = serverClientBase[serverClientBase.length].Sup;
-      serverClientBase[resetClientIndex].JoinClientIP = serverClientBase[serverClientBase.length].JoinClientIP;
-      serverClientBase[resetClientIndex].JoinClientIPIndex = serverClientBase[serverClientBase.length].JoinClientIPIndex;
-
-      socket.broadcast.emit("Reset",serverClientBase[resetClientIndex]);
-      console.log("www Reset Emit = "+serverClientBase[resetClientIndex]);
-    }
-  }
-
-
-  // socket.on("directive",function (message) {//印出client端丟出的資料，確認是否有收到
-  //   console.log(message);
-  //   socket.broadcast.emit("Screen",message);//從client端接收到server端後，再傳至其他server端的程式做處理，這裡是把資料再傳給Screen.js中做處理
-  // });
-});
-
-// /**
-//  * Deal with database fs/////////////////////存檔
-//  */
-// const fs = require("fs");
-// io.on("SaveClient",function (SaveClient) {//儲存來自體驗者的資訊
-//
-//   fs.writeFile("ClientData.json", JSON.stringify(SaveClient), function () {
-//     // console.log(" setClientIP(0)="+ SaveClientIP+" Save sucess !");//browser端印出
-//
-//
-//     fs.readFile("ClientData.json", "utf-8", function (err, data) {//讀檔
-//       if (err) throw err;
-//       console.log("LoadClient=" + JSON.parse(data));
-//       io.broadcast.emit("UpDate", JSON.parse(data));//再將更新的IP送出
-//     })
-//   })
-// })
-
-// socket.on("SaveSubClient",function (SaveSubClient) {//儲存來自協助者的資訊
-//   fs.appendFile("ClientData.json",JSON.stringify(SaveSubClient),function () {//補在後方，不覆蓋
-//
-//
-//     fs.readFile("ClientData.json","utf-8",function (err,data) {//讀檔
-//       if (err) throw err;
-//       console.log("LoadClientSub="+JSON.parse(data));
-//       io.broadcast.emit("UpDate",JSON.parse(data));//再將更新的Client資訊送出
-//     })
-//   })
-// })
 
 
 
