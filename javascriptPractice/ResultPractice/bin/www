@@ -64,7 +64,7 @@ io.on("connection",function (socket) {
       saveBase.Join = serverClient.Join;//更新www端Join值
       saveBase.Sup = serverClient.Sup;//更新www端Sup值
       catchIndex = saveBase.IP.indexOf(ClientIP);
-      saveBase.joinlock[catchIndex] = serverClient.joinlock;//此Client端的lock存放位置跟IP的索引一樣
+      saveBase.joinlock[catchIndex] = serverClient.joinlock;//此Client端的lock存放位置跟IP的索引一樣，lock決定此客戶端有沒有加入體驗
 
       socket.broadcast.emit("UpData", serverClient);
       console.log("www Database SaveBase: "+" catchIndex:"+catchIndex);

@@ -5,7 +5,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>SEXUALLY BULLYING</title>
+  <title>渣男下地獄 SEXUALLY BULLYING</title>
   <link rel="stylesheet" href="/stylesheets/style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.min.js">
   </script>
@@ -37,7 +37,7 @@
     <div class="jumbotron">
       <!--jumbotron-->
       <div>
-        <h1 class="headline">SEXUALLY BULLYING !</h1>
+        <h1 class="headline">渣男下地獄 SEXUALLY BULLYING !</h1>
         <p class="headline">本網站宗旨在於: 透過線上互動的方式，讓體驗者經歷所謂網路上報復性性侵害事件的被害人的相關經歷，以及體會他可能的感受</p>
       </div>
       <div class="row justify-content-end align-items-end">
@@ -65,11 +65,68 @@
           <div class="row my-1 text-center"><!--確認體驗者角色 按鈕 -->
             <div class="col-xl-4 justify-content-center ">
               <h5 id="MemberJoin" class="headline"> 0/1 位體驗者</h5>
-              <button class="col-xl-10 btn btn-primary align-self-start" type="button"  onclick="addJoinMember()">Join</button>
+              <!-----------------------Join Button----------------------------->
+              <button class="col-xl-10 btn btn-primary align-self-start" type="button" onclick="addJoinMember()" data-toggle="modal" data-target="#JoinButton">Join</button>
+              <!--data-toggle、 data-target為bootstrap自訂義屬性，前者為為，"目標id"加上屬性e.g modal 為彈跳視窗。後者為訂立"目標id"-->
+              <!-- Modal --><!-----------------------彈跳Join視窗----------------------------->
+              <div class="modal fade" id="JoinButton" tabindex="-1" role="dialog" aria-labelledby="JoinButtonModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="JoinButtonModalLongTitle">Modal title</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      ...
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-----------------------彈跳Join視窗----------------------------->
             </div>
             <div class="col-xl-4 justify-content-center">
               <h5 id="MemberSup" class="headline">0/4 位協助者</h5>
-              <button class="col-xl-10 btn btn-primary align-self-end"  type="button"  onclick="addSubMember()">Support</button>
+              <!-----------------------Support Button----------------------------->
+              <button class="col-xl-10 btn btn-primary align-self-end"  type="button" data-toggle="modal" data-target="#SupportButton">Support</button>
+              <!-- Modal --><!-----------------------彈跳Support視窗----------------------------->
+              <div class="modal fade" id="SupportButton" tabindex="-1" role="dialog" aria-labelledby="SupportButtonModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title text-dark font-weight-bold" id="SupportButtonModalLongTitle">您好協助者!!</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <!-------------------------------彈跳視窗內容------------------------------------>
+                    <div class="modal-body">
+                      <div>
+                        <h6 class="text-dark">歡迎加入一場無法回頭的 GAME</h6>
+                        <h6 class="text-dark">你/妳必須承接某個角色並完成接下來的挑戰</h6>
+                        <h6 class="text-dark">妳/你的成功與否將影響體驗者的未來!</h6>
+                      </div>
+                      <form>
+                        <div class="form-group">
+                          <label for="recipient-name" class="col-form-label text-dark font-weight-bold">請輸入你妳的協助者名稱:</label>
+                          <input type="text" class="form-control" id="recipient-name">
+                        </div>
+                      </form>
+                    </div>
+                    <!-------------------------------彈跳視窗內容------------------------------------>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="cancelSubMember()">放棄成為協助者</button>
+                      <button type="button" class="btn btn-primary" onclick="addSubMember()">接受挑戰</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-----------------------彈跳Support視窗----------------------------->
             </div>
           </div>
         </div>
@@ -90,6 +147,7 @@
     class Client {//Client端儲存模板
       constructor(IP,name) {
         this.IP =IP;//本Client端IP
+        this.role = 0;//本Client端擁護選擇角色，0為未加入,1為join,2為Sup
         this.name = name;//本Client端用戶名
         this.Join = 0;//體驗者人數
         this.Sup = 0;//協助者人數
@@ -99,6 +157,7 @@
     }
     let localClient = new Client();//建立本Client端物件來儲存相關資訊
     ////////////////////////////////連接時同步www端資料/////////////
+    //Clinet端動到Join
     io().on("Set",function (ClientIP,saveBase,catchIndex) {
       localClient.Join = saveBase.Join;
       localClient.Sup = saveBase.Sup;
@@ -131,6 +190,7 @@
       if(localClient.joinlock === false)
       {
         localClient.Join +=1;//更新本Client端Join值
+        localClient.role =1;
         localClient.joinlock = true;
         socket.emit("JoinAdd",localClient);//送出Join更新值給www端，因本Client端已更新故可在www端被複寫
         document.getElementById("MemberJoin").innerHTML = localClient.Join+"/1 位體驗者";
@@ -138,15 +198,24 @@
     }
 
 
-
     function addSubMember()//本Client端Support按下後更新
     {
       if(localClient.joinlock === false)
       {
         localClient.Sup +=1;//更新本Client端Sup值
+        localClient.role =2;
         localClient.joinlock = true;
         socket.emit("JoinAdd",localClient);//送出Join更新值給www端，因本Client端已更新故可在www端被複寫
         document.getElementById("MemberSup").innerHTML = localClient.Sup+"/4 位協助者";
+      }
+    }
+    function cancelSubMember()//本Client端減去support參與人數
+    {
+      if(localClient.Sup !== 0)
+      {
+        localClient.Sup-=1;
+        localClient.joinlock = false;
+        socket.emit("cancelJoin",localClient);
       }
     }
   </script>
