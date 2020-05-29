@@ -17,10 +17,11 @@ class saveClient {}//www端接收模板
 
 class saveServer{//www端儲存庫模板
   constructor() {
-    this.IP = [];//不可覆寫
+    this.IP = [];//IP庫,不可覆寫
     this.Join = 0;//體驗者人數
     this.Sup = 0;//協助者人數
-    this.joinlock = [];//不可覆寫
+    this.rolelocks = [];//角色庫，不可覆寫
+    // this.joinlock = [];//鎖頭庫,不可覆寫
   }
 }
 let serverClient = new saveClient();//建立www端物件來儲存接收資訊，可覆寫
@@ -39,7 +40,7 @@ io.on("connection",function (socket) {
   {
     saveBase.IP[IPIndex] = ClientIP;
     catchIndex = IPIndex;//此Client端的IP位置視為存取位置
-    saveBase.joinlock[catchIndex] = false;
+    // saveBase.rolelocks[catchIndex] = undefined;
     IPIndex+=1;
     console.log("New Connect Success! New ClientIP: "+ClientIP);
   }
@@ -55,16 +56,17 @@ io.on("connection",function (socket) {
     return  element === ClientIP;
   }
 
-  /////////////////////////////////////////Data對比更新/////////////////////////////////////////
-    socket.on("JoinAdd",function (JoinAdd) {//接收Client端Data更新
+  /////////////////////////////////////////Data新增對比更新/////////////////////////////////////////
+    socket.on("ClientUpData",function (ClientUpData) {//接收Client端Data更新
 
-      serverClient = JoinAdd;//將接收的物件用www端物件存取
+      serverClient = ClientUpData;//將接收的物件用www端物件存取
 
   ///////////////////////////////////////////更新www端更新///////////////////////////////////
       saveBase.Join = serverClient.Join;//更新www端Join值
       saveBase.Sup = serverClient.Sup;//更新www端Sup值
       catchIndex = saveBase.IP.indexOf(ClientIP);
-      saveBase.joinlock[catchIndex] = serverClient.joinlock;//此Client端的lock存放位置跟IP的索引一樣，lock決定此客戶端有沒有加入體驗
+      saveBase.rolelocks[catchIndex] = serverClient.rolelock;
+      // saveBase.joinlock[catchIndex] = serverClient.joinlock;//此Client端的lock存放位置跟IP的索引一樣，lock決定此客戶端有沒有加入體驗
 
       socket.broadcast.emit("UpData", serverClient);
       console.log("www Database SaveBase: "+" catchIndex:"+catchIndex);

@@ -66,24 +66,46 @@
             <div class="col-xl-4 justify-content-center ">
               <h5 id="MemberJoin" class="headline"> 0/1 位體驗者</h5>
               <!-----------------------Join Button----------------------------->
-              <button class="col-xl-10 btn btn-primary align-self-start" type="button" onclick="addJoinMember()" data-toggle="modal" data-target="#JoinButton">Join</button>
+              <button class="col-xl-10 btn btn-primary align-self-start" type="button" data-toggle="modal" data-target="#JoinButton">Join</button>
               <!--data-toggle、 data-target為bootstrap自訂義屬性，前者為為，"目標id"加上屬性e.g modal 為彈跳視窗。後者為訂立"目標id"-->
               <!-- Modal --><!-----------------------彈跳Join視窗----------------------------->
               <div class="modal fade" id="JoinButton" tabindex="-1" role="dialog" aria-labelledby="JoinButtonModalCenterTitle" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
                   <div class="modal-content">
                     <div class="modal-header">
-                      <h5 class="modal-title" id="JoinButtonModalLongTitle">Modal title</h5>
+                      <h5 class="modal-title text-dark font-weight-bold" id="JoinButtonModalLongTitle">您好體驗者!!</h5>
                       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                       </button>
                     </div>
                     <div class="modal-body">
-                      ...
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                      <button type="button" class="btn btn-primary">Save changes</button>
+                      <!------------------------------JoinBody----------------------->
+                      <div>
+                        <h6 class="text-dark">歡迎加入一場無法回頭的 GAME</h6>
+                        <h6 class="text-dark">你/妳將成為報復性性暴力的被害人</h6>
+                        <h6 class="text-dark">妳/你的恐怖情人將對妳出手，無數的親密照將公諸於世</h6>
+                        <h6 class="text-dark">妳/你必須阻止它們流散出去，否則一切將無法挽回</h6>
+                      </div>
+                      <form class="needs-validation" novalidate method="get" > <!--class="needs-validation" novalidate 以上class是用於建立話框審查，<form> 會處理裡面 type=submit 的資料傳輸，並將傳輸的訊息掛在網址上"?"之後-->
+                        <div class="form-group">
+                          <label for="JoinNameText" class="col-form-label text-dark font-weight-bold">請輸入你妳的體驗者名稱:</label>
+                          <input type="text"  name="user" class="form-control" id="JoinNameText" placeholder="體驗者名字" required="required"><!-- placeholder: 預設欄位中的內容 -->
+                          <div class="valid-feedback">
+                            我記住妳/你了
+                          </div>
+                          <div class="invalid-tooltip">
+                            Who are you?
+                          </div>
+                          <label for="JoinBirth" class="col-form-label text-dark font-weight-bold">請輸入您的生日:</label>
+                          <input id="JoinBirth" name="JoinBirth" type="date" value="2012-12-31"><!-- required: 限制欄位不為空 -->
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" id="JoinCancelButton" class="btn btn-secondary" data-dismiss="modal" onclick="cancelAdd(this)">放棄成為體驗者</button><!--data-dismiss 為關閉彈跳視窗-->
+                          <!-----------------------apply Button----------------------------->
+                          <button type="btn submit" class="btn btn-primary"  onclick="addJoinMember()" >接受挑戰</button>
+                        </div>
+                      </form>
+                      <!------------------------------JoinBody----------------------->
                     </div>
                   </div>
                 </div>
@@ -106,23 +128,32 @@
                     </div>
                     <!-------------------------------彈跳視窗內容------------------------------------>
                     <div class="modal-body">
+                      <!------------------------------SupBody----------------------->
                       <div>
                         <h6 class="text-dark">歡迎加入一場無法回頭的 GAME</h6>
                         <h6 class="text-dark">你/妳必須承接某個角色並完成接下來的挑戰</h6>
                         <h6 class="text-dark">妳/你的成功與否將影響體驗者的未來!</h6>
                       </div>
-                      <form>
+                      <form class="needs-validation" novalidate method="get" > <!--class="needs-validation" novalidate 以上class是用於建立話框審查，<form> 會處理裡面 type=submit 的資料傳輸，並將傳輸的訊息掛在網址上"?"之後-->
                         <div class="form-group">
-                          <label for="recipient-name" class="col-form-label text-dark font-weight-bold">請輸入你妳的協助者名稱:</label>
-                          <input type="text" class="form-control" id="recipient-name">
+                          <label for="SupNameText" class="col-form-label text-dark font-weight-bold">請輸入你妳的協助者名稱:</label>
+                          <input type="text"  name="user" class="form-control" id="SupNameText" placeholder="協助者名字" required="required"><!-- placeholder: 預設欄位中的內容 -->
+                          <div class="valid-feedback">
+                            我記住妳/你了
+                          </div>
+                          <div class="invalid-tooltip">
+                            Who are you?
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" id="SupCancelButton" class="btn btn-secondary" data-dismiss="modal" onclick="cancelAdd(this)">放棄成為協助者</button><!--data-dismiss 為關閉彈跳視窗-->
+                          <!-----------------------apply Button----------------------------->
+                          <button type="btn submit" class="btn btn-primary"  onclick="addSubMember()" >接受挑戰</button>
                         </div>
                       </form>
+                      <!------------------------------SupBody----------------------->
                     </div>
                     <!-------------------------------彈跳視窗內容------------------------------------>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="cancelSubMember()">放棄成為協助者</button>
-                      <button type="button" class="btn btn-primary" onclick="addSubMember()">接受挑戰</button>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -147,11 +178,10 @@
     class Client {//Client端儲存模板
       constructor(IP,name) {
         this.IP =IP;//本Client端IP
-        this.role = 0;//本Client端擁護選擇角色，0為未加入,1為join,2為Sup
+        this.rolelock = undefined;//本Client端擁護選擇角色，0為未加入,1為join,2為Sup
         this.name = name;//本Client端用戶名
         this.Join = 0;//體驗者人數
         this.Sup = 0;//協助者人數
-        this.joinlock = false;//本Client端是否已經join
         this.catchIndex = 0;//取物索引
       }
     }
@@ -162,7 +192,7 @@
       localClient.Join = saveBase.Join;
       localClient.Sup = saveBase.Sup;
       localClient.catchIndex = catchIndex;
-      localClient.joinlock = saveBase.joinlock[catchIndex];
+      localClient.rolelock = saveBase.rolelocks[catchIndex];
 
       if(localClient.IP === undefined)
       {
@@ -187,38 +217,109 @@
 
     function addJoinMember()//本Client端Join按下後更新
     {
-      if(localClient.joinlock === false)
+      if(localClient.rolelock === undefined || localClient.rolelock === null)
       {
-        localClient.Join +=1;//更新本Client端Join值
-        localClient.role =1;
-        localClient.joinlock = true;
-        socket.emit("JoinAdd",localClient);//送出Join更新值給www端，因本Client端已更新故可在www端被複寫
-        document.getElementById("MemberJoin").innerHTML = localClient.Join+"/1 位體驗者";
+        if(checkInput("JoinNameText") !== "") {
+          localClient.Join += 1;//更新本Client端Join值
+          localClient.rolelock = 1;
+          console.log("in");
+          socket.emit("ClientUpData", localClient);//送出Join更新值給www端，因本Client端已更新故可在www端被複寫
+          document.getElementById("MemberJoin").innerHTML = localClient.Join + "/1 位體驗者";
+        }
+        else
+        {
+          alert("請確認資料填妥!")
+        }
+      }
+      else
+      {
+        alert("您已經加入挑戰，請放棄資格後重新選擇!")
       }
     }
 
 
     function addSubMember()//本Client端Support按下後更新
     {
-      if(localClient.joinlock === false)
+      if(localClient.rolelock === undefined || localClient.rolelock === null)
       {
-        localClient.Sup +=1;//更新本Client端Sup值
-        localClient.role =2;
-        localClient.joinlock = true;
-        socket.emit("JoinAdd",localClient);//送出Join更新值給www端，因本Client端已更新故可在www端被複寫
-        document.getElementById("MemberSup").innerHTML = localClient.Sup+"/4 位協助者";
+        if(checkInput("SupNameText") !== "")
+        {
+          localClient.Sup +=1;//更新本Client端Sup值
+          localClient.rolelock =2;
+          socket.emit("ClientUpData",localClient);//送出Sup更新值給www端，因本Client端已更新故可在www端被複寫
+          document.getElementById("MemberSup").innerHTML = localClient.Sup+"/4 位協助者";
+        }
+        else
+        {
+          alert("請確認資料填妥!")
+        }
+      }
+      else
+      {
+        alert("您已經加入挑戰，請放棄資格後重新選擇!")
       }
     }
-    function cancelSubMember()//本Client端減去support參與人數
+    
+    function urlAnalyst() {//解析網址
+      let strUrl = location.href;
+      let url = new URL(strUrl);
+      console.log(url.searchParams.get("user"));
+      return url.searchParams.get("user");
+    }
+
+    function checkInput(InputId) {//透過id找到輸入之欄位，確認欄位的value元素不是預設值
+
+      let element = document.getElementById(InputId);//SupNameText
+      let value = element.value;
+      console.log("value: "+value);
+      return value;
+    }
+
+    function cancelAdd(getId)
     {
-      if(localClient.Sup !== 0)
-      {
-        localClient.Sup-=1;
-        localClient.joinlock = false;
-        socket.emit("cancelJoin",localClient);
-      }
+      console.log(getId.id);
+        if(getId.id === "SupCancelButton" && localClient.rolelock ===2)
+        {
+          localClient.Sup -=1;//更新本Client端Sup值
+          localClient.rolelock = undefined;
+          console.log(localClient);
+          socket.emit("ClientUpData",localClient);//送出更新值給www端，因本Client端已更新故可在www端被複寫
+          document.getElementById("MemberSup").innerHTML = localClient.Sup+"/4 位協助者";
+        }
+        else if(getId.id === "JoinCancelButton" && localClient.rolelock ===1)
+          {
+            localClient.Join -=1;//更新本Client端Sup值
+            localClient.rolelock = undefined;
+            console.log(localClient);
+            socket.emit("ClientUpData",localClient);//送出更新值給www端，因本Client端已更新故可在www端被複寫，ClientUpData = 舊的JoinAdd，為了方便閱讀所以改名
+            document.getElementById("MemberSup").innerHTML = localClient.Sup+"/4 位協助者";
+          }
+      location.href =("http://localhost:3000/");//去除附帶參數
     }
+
   </script>
+
+  <script>//bootstrap處理輸入錯誤JS原始碼
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function() {
+      'use strict';
+      window.addEventListener('load', function() {
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.getElementsByClassName('needs-validation');
+        // Loop over them and prevent submission
+        var validation = Array.prototype.filter.call(forms, function(form) {
+          form.addEventListener('submit', function(event) {
+            if (form.checkValidity() === false) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+          }, false);
+        });
+      }, false);
+    })();
+  </script>
+  <!--表格輸入判斷-->
 
   <!--Bootstrap-->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
