@@ -33,9 +33,12 @@ let catchIndex = 0;
  * socket.io Listen 
  */
 io.on("connection",function (socket) {
+  ////////////////抓本機虛擬IP///////////////////////////////////
+////////////失敗/////////////////////////
   //建立client端監測接收端，如監測到connection類型被client端丟出，則印出丟出的client IP
   /////////////////////////////////////////////初始化///////////////////////////////////////////
   let ClientIP = socket.handshake.address;//取得要求連線之IP位置
+
   if(saveBase.IP.find(checkIP)===undefined)//如果IP庫不存在此IP，則存入IP庫
   {
     saveBase.IP[IPIndex] = ClientIP;

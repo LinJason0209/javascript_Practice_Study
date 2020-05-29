@@ -42,7 +42,7 @@
       </div>
       <div class="row justify-content-end align-items-end">
         <div class="col-xl-4 mt-3">
-          <button class="btn btn-secondary col-xl-12" type="button" onclick="location.href='javascripts/Client.html'">相關連結</button>
+          <button class="btn btn-secondary col-xl-12" type="button" onclick="location.href='Client.html'">相關連結</button>
         </div>
       </div>
       <!--jumbotron-->
@@ -86,7 +86,7 @@
                         <h6 class="text-dark">妳/你的恐怖情人將對妳出手，無數的親密照將公諸於世</h6>
                         <h6 class="text-dark">妳/你必須阻止它們流散出去，否則一切將無法挽回</h6>
                       </div>
-                      <form class="needs-validation" novalidate method="get" > <!--class="needs-validation" novalidate 以上class是用於建立話框審查，<form> 會處理裡面 type=submit 的資料傳輸，並將傳輸的訊息掛在網址上"?"之後-->
+                      <form class="needs-validation" novalidate method="get"> <!--class="needs-validation" novalidate 以上class是用於建立話框審查，<form> 會處理裡面 type=submit 的資料傳輸，並將傳輸的訊息掛在網址上"?"之後-->
                         <div class="form-group">
                           <label for="JoinNameText" class="col-form-label text-dark font-weight-bold">請輸入你妳的體驗者名稱:</label>
                           <input type="text"  name="user" class="form-control" id="JoinNameText" placeholder="體驗者名字" required="required"><!-- placeholder: 預設欄位中的內容 -->
@@ -128,13 +128,13 @@
                     </div>
 <!-------------------------------彈跳視窗內容------------------------------------>
                     <div class="modal-body">
- <!--------------------------------------------upBody-------------------------->
+ <!--------------------------------------------SupBody-------------------------->
                       <div>
                         <h6 class="text-dark">歡迎加入一場無法回頭的 GAME</h6>
                         <h6 class="text-dark">你/妳必須承接某個角色並完成接下來的挑戰</h6>
                         <h6 class="text-dark">妳/你的成功與否將影響體驗者的未來!</h6>
                       </div>
-                      <form class="needs-validation" novalidate method="get" > <!--class="needs-validation" novalidate 以上class是用於建立話框審查，<form> 會處理裡面 type=submit 的資料傳輸，並將傳輸的訊息掛在網址上"?"之後-->
+                      <form class="needs-validation" id="SupModelForm" novalidate method="get"> <!--class="needs-validation" novalidate 以上class是用於建立話框審查，<form> 會處理裡面 type=submit 的資料傳輸，並將傳輸的訊息掛在網址上"?"之後-->
                         <div class="form-group">
                           <label for="SupNameText" class="col-form-label text-dark font-weight-bold">請輸入你妳的協助者名稱:</label>
                           <input type="text"  name="user" class="form-control" id="SupNameText" placeholder="協助者名字" required="required"><!-- placeholder: 預設欄位中的內容 -->
@@ -160,10 +160,12 @@
 <!-----------------------彈跳Support視窗----------------------------->
             </div>
           </div>
+            <div class="row col-xl-12 align-items-end">
+                <button class="col-xl-6 btn p-3 mb-2 bg-success text-white offset-md-1 my-1" type="button" onclick="startGame()">START</button>
+            </div>
         </div>
+        <div class="row col-xl-6 align-items-end" >
 
-        <div class="row col-xl-6">
-          <!--輸入生日-->
         </div>
       <!--row for second section-->
     </div>
@@ -173,7 +175,7 @@
 
   <!--javascript in this page -->
   <script src="/socket.io/socket.io.js"></script>
-  <script src="index.js"></script>
+  <script src="javascripts/index.js"></script>
   <script>
     const  socket = io();//匯入io函式庫
     class Client {//Client端儲存模板
@@ -187,13 +189,15 @@
       }
     }
     let localClient = new Client();//建立本Client端物件來儲存相關資訊
+    let localVirtualIP;
     ////////////////////////////////連接時同步www端資料/////////////
     //Clinet端動到Join
-    io().on("Set",function (ClientIP,saveBase,catchIndex) {
+    io().on("Set",function (ClientIP,saveBase,catchIndex,networkInterfaces) {
       localClient.Join = saveBase.Join;
       localClient.Sup = saveBase.Sup;
       localClient.catchIndex = catchIndex;
       localClient.rolelock = saveBase.rolelocks[catchIndex];
+      localVirtualIP = networkInterfaces;
 
       if(localClient.IP === undefined)
       {
