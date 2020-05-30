@@ -160,9 +160,14 @@
 <!-----------------------彈跳Support視窗----------------------------->
             </div>
           </div>
+            <!-----------------------開始按鈕----------------------------->
             <div class="row col-xl-12 align-items-end">
                 <button class="col-xl-6 btn p-3 mb-2 bg-success text-white offset-md-1 my-1" type="button" onclick="startGame()">START</button>
             </div>
+            <div class="row col-xl-12 align-items-end">
+                <button class="col-xl-6 btn p-3 mb-2 bg-wrong text-white offset-md-1 my-1" type="button" onclick="reStartGame()">RESTART</button>
+            </div>
+            <!-----------------------開始按鈕----------------------------->
         </div>
         <div class="row col-xl-6 align-items-end" >
 
@@ -179,16 +184,19 @@
   <script>
     const  socket = io();//匯入io函式庫
     class Client {//Client端儲存模板
-      constructor(IP,name) {
+      constructor(IP,user) {
         this.IP =IP;//本Client端IP
         this.rolelock = undefined;//本Client端擁護選擇角色，0為未加入,1為join,2為Sup
-        this.name = name;//本Client端用戶名
+        this.user = user;//本Client端用戶名
         this.Join = 0;//體驗者人數
         this.Sup = 0;//協助者人數
+        this.JoinBirth =0;//生日日期
         this.catchIndex = 0;//取物索引
+        this.GameLock = false;//避免遊戲中被例外狀況restart
       }
     }
     let localClient = new Client();//建立本Client端物件來儲存相關資訊
+    let RestartClient = new Client();//重置/初始化Client端資料狀態
     let localVirtualIP;
     ////////////////////////////////連接時同步www端資料/////////////
     //Clinet端動到Join
@@ -198,13 +206,21 @@
       localClient.catchIndex = catchIndex;
       localClient.rolelock = saveBase.rolelocks[catchIndex];
       localVirtualIP = networkInterfaces;
+      localClient.GameLock = saveBase.GameLock;
 
       if(localClient.IP === undefined)
       {
         localClient.IP = ClientIP;
         console.log("IP:"+ClientIP)
       }
-      document.getElementById("MemberJoin").innerHTML = localClient.Join+"/1 位體驗者";
+        if(localClient.GameLock===true)
+        {
+            document.getElementById("MemberJoin").innerHTML = localClient.Join+"/1 位體驗者(已開始遊戲，請協助者進場)";
+        }
+        else
+        {
+            document.getElementById("MemberJoin").innerHTML = localClient.Join+"/1 位體驗者";
+        }
       document.getElementById("MemberSup").innerHTML = localClient.Sup+"/4 位協助者";
       console.log(localClient);
     })
@@ -212,11 +228,24 @@
     io().on("UpData",function (UpData) {
       localClient.Join = UpData.Join;
       localClient.Sup = UpData.Sup;
-
-      document.getElementById("MemberJoin").innerHTML = localClient.Join+"/1 位體驗者";
+      localClient.GameLock = UpData.GameLock;
+      console.log(UpData.GameLock);
+      if(localClient.GameLock===true)
+      {
+          document.getElementById("MemberJoin").innerHTML = localClient.Join+"/1 位體驗者(已開始遊戲，請協助者進場)";
+      }
+      else
+      {
+          document.getElementById("MemberJoin").innerHTML = localClient.Join+"/1 位體驗者";
+      }
       document.getElementById("MemberSup").innerHTML = localClient.Sup+"/4 位協助者";
       console.log("IP:"+localClient.IP)
       console.log(localClient);
+    })
+
+    ////////////////////////////////有Client端restart時重置Client端/////////////
+    io().on("RestartClient",function (RestartClient) {
+        localClient = RestartClient;
     })
 
 ///////////////////////以下JS原始碼 搬遷至index.js統一管理/////////////////

@@ -6,24 +6,78 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Client Draw</title>
-    <script src="/socket.io/socket.io.js"></script>
-
-
-    <script>
-        const  socket = io();//匯入io函式庫
-
-    </script>
+    <title>SUPPORT CHALLENGE!!</title>
 </head>
 <body>
-<!--請選擇您的代表色:<br>-->
-<!--<input id="color" type="color" value="#000000"/>-->
-<!--<button id="btn" onclick="onBtnClicked()">發射!</button> &lt;!&ndash;onBtnClicked()，為實作onclick，按鈕按下後的反饋&ndash;&gt;-->
 
-<!--Bootstrap-->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+
+
+    <!--javascript in this page -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="javascripts/index.js"></script>
+    <script>const  socket = io();//匯入io函式庫</script>
+    <script>
+        class ClientSupport {//Client端儲存模板
+            constructor(IP,user,JoinName) {
+                this.IP =IP;//本Client端IP
+                this.user = user;//本Client端用戶名
+                this.JoinName = JoinName;//體驗者名稱
+                this.SupName = [];//協助者名稱
+                this.catchIndex = 0;//取物索引
+            }
+        }
+        let localClient = new ClientSupport();
+        let RestartClient = new ClientSupport();//重置/初始化Client端資料狀態
+
+        ////////////////////////////////連接時同步www端資料/////////////
+        //Clinet端動到Join
+        io().on("Set",function (ClientIP,saveBase,catchIndex) {
+            localClient.catchIndex = catchIndex;
+            localClient.SupName = saveBase.users;
+            localClient.JoinName = catchJoinName(saveBase);
+            localClient.user = saveBase.users[localClient.catchIndex];
+            if(localClient.IP === undefined)
+            {
+                localClient.IP = ClientIP;
+                console.log("IP:"+ClientIP)
+            }
+            console.log(localClient);
+        })
+        ////////////////////////////////有Client端commit時同步www端資料/////////////
+        io().on("UpData",function (UpData) {
+            console.log("IP:"+localClient.IP)
+            console.log(localClient);
+        })
+
+        ////////////////////////////////有Client端restart時重置Client端/////////////
+        io().on("RestartClient",function () {
+            localClient = RestartClient;
+        })
+    </script>
+    <script>//bootstrap處理輸入錯誤JS原始碼
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+    </script>
+    <!--Bootstrap-->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
 
 </body>
 </html>

@@ -21,10 +21,14 @@ class saveServer{//www端儲存庫模板
     this.Join = 0;//體驗者人數
     this.Sup = 0;//協助者人數
     this.rolelocks = [];//角色庫，不可覆寫
+    this.users =[];//角色名稱庫
+    this.JoinUserBirth = 0;//生日
+    this.GameLock = false;
     // this.joinlock = [];//鎖頭庫,不可覆寫
   }
 }
 let serverClient = new saveClient();//建立www端物件來儲存接收資訊，可覆寫
+let RestartBase = new saveClient();//初始化www端資料庫
 let saveBase= new saveServer();//www端儲存最新版
 let IPIndex = 0;
 let catchIndex = 0;
@@ -67,14 +71,29 @@ io.on("connection",function (socket) {
   ///////////////////////////////////////////更新www端更新///////////////////////////////////
       saveBase.Join = serverClient.Join;//更新www端Join值
       saveBase.Sup = serverClient.Sup;//更新www端Sup值
-      catchIndex = saveBase.IP.indexOf(ClientIP);
-      saveBase.rolelocks[catchIndex] = serverClient.rolelock;
-      // saveBase.joinlock[catchIndex] = serverClient.joinlock;//此Client端的lock存放位置跟IP的索引一樣，lock決定此客戶端有沒有加入體驗
+      
+      catchIndex = saveBase.IP.indexOf(ClientIP);//取的此Client IP位於伺服端的儲存索引
+      saveBase.rolelocks[catchIndex] = serverClient.rolelock;//更新角色種類
+      saveBase.users[catchIndex] = serverClient.user;//更新角色名稱
+      saveBase.GameLock = serverClient.GameLock;
 
+      if(serverClient.rolelock ===1)
+      {
+        saveBase.JoinUserBirth = serverClient.JoinBirth;//更新體驗者生日
+      }
       socket.broadcast.emit("UpData", serverClient);
       console.log("www Database SaveBase: "+" catchIndex:"+catchIndex);
       console.log(saveBase);
+      console.log("www Database emit server: "+" catchIndex:"+catchIndex);
+      console.log(serverClient);
     });
+  
+    socket.on("Restart",function (Restart) {
+      socket.broadcast.emit("RestartClient",Restart);
+      saveBase = RestartBase;
+      console.log("www Database RestartBase: ");
+      console.log(saveBase);
+    })
   });
 
 

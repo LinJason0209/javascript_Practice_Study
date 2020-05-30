@@ -1,3 +1,4 @@
+
 function addJoinMember()//本Client端Join按下後更新
 {
     if(localClient.rolelock === undefined || localClient.rolelock === null)
@@ -13,13 +14,17 @@ function addJoinMember()//本Client端Join按下後更新
             }
             else
             {
-                alert("請確認資料填妥!")
+                alert("請確認資料填妥!");
             }
+        }
+        else
+        {
+            alert("體驗者人數已滿!");
         }
     }
     else
     {
-        alert("您已經加入挑戰，請放棄資格後重新選擇!")
+        alert("您已經加入挑戰，請放棄資格後重新選擇!");
     }
 }
 
@@ -44,19 +49,17 @@ function addSubMember()//本Client端Support按下後更新
                 alert("請確認資料填妥!")
             }
         }
+        else
+        {
+            alert("協助者人數已滿!");
+        }
     }
     else
     {
-        alert("您已經加入挑戰，請放棄資格後重新選擇!")
+        alert("您已經加入挑戰，您可以修改名稱與生日，或放棄資格後重新選擇!")
     }
 }
 
-function urlAnalyst() {//解析網址
-    let strUrl = location.href;
-    let url = new URL(strUrl);
-    console.log(url.searchParams.get("user"));
-    return url.searchParams.get("user");
-}
 
 function checkInput(InputId) {//透過id找到輸入之欄位，確認欄位的value元素不是預設值
 
@@ -108,10 +111,70 @@ function changeAction()
 function startGame() {
     if(localClient.rolelock !== undefined || localClient.rolelock === null)
     {
-        location.href='Client.html';
+        if(localClient.Join === 1)
+        {
+            if(localClient.rolelock === 1)
+            {
+                localClient.GameLock = true;
+                location.href='Screen.html';
+            }
+            else if (localClient.rolelock === 2)
+            {
+                location.href='Client.html';
+            }
+        }
+        else
+        {
+            alert("請確認體驗者已參加，按下START");
+        }
+        let sents = urlAnalyst();
+        sentData(sents);
+        socket.emit("ClientUpData",localClient);//送出更新值給www端，因本Client端已更新故可在www端被複寫
     }
     else
     {
         alert("請選擇您的體驗方式!");
     }
 }
+function urlAnalyst() {//解析網址
+    let strUrl = location.href;
+    let url = new URL(strUrl);
+    let sents =[];
+    sents[0] = url.searchParams.get("user")
+    if(localClient.rolelock === 1)
+    {
+        sents[1] = url.searchParams.get("JoinBirth");
+    }
+    return sents;
+}
+function sentData(sents){
+    localClient.user = sents[0];
+    localClient.JoinBirth = sents[1];
+}
+function reStartGame(){
+    if(localClient.GameLock === false)
+    {
+        console.log(localClient.IP);
+        console.log(localClient.GameLock);
+            socket.emit("Restart",RestartClient,function () {
+                urlReset();
+            });
+    }
+    else if(localClient.GameLock === true)
+    {
+        console.log(localClient.IP);
+        console.log(localClient.GameLock);
+            alert("請等遊戲結束後再繼續");
+    }
+}
+/////////////////////clientSupport///////////////////
+function catchJoinName(saveBase) {//取得體驗者名稱，透過找尋角色種類取得索引
+    let catchIndex = (element) => element === 1;
+    let index = saveBase.rolelocks.findIndex(catchIndex);
+    let JoinName = saveBase.users[index];
+    return JoinName;
+}
+function catchUserName(ClientIP) {
+    let index = ClientIP
+}
+
