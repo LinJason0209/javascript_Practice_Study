@@ -27,6 +27,16 @@ class saveServer{//www端儲存庫模板
     // this.joinlock = [];//鎖頭庫,不可覆寫
   }
 }
+class ServerQuest{//伺服端問題庫
+  constructor() {
+    this.questRole = null;//角色種類名稱
+    this.questRoleIndex = [];//題庫種類，基本上userRole是它的索引值，主要用於意外處理
+    this.questIndex =[];//題庫索引，第幾題的意思
+    this.questBase =[];//題庫
+  }
+}
+let setQuestBase = new ServerQuest();//題庫實例化
+///////////////////////////////////////////////////伺服端連線/資料交換///////////////////////////
 let serverClient = new saveClient();//建立www端物件來儲存接收資訊，可覆寫
 let RestartBase = new saveClient();//初始化www端資料庫
 let saveBase= new saveServer();//www端儲存最新版
@@ -93,8 +103,88 @@ io.on("connection",function (socket) {
       saveBase = RestartBase;
       console.log("www Database RestartBase: ");
       console.log(saveBase);
-    })
+    });
+//////////////////////////////////////////////////伺服端問題庫建置////////////////////////////
+  socket.on("getQuest",function (questRoleIndex,questIndex) {//questRoleIndex決定角色，收到來自Client端的角色確認的數值，並將其當作選題索引，questRoleIndex: 控制角色種類,questIndex 控制該角色種類下第幾個題目
+    if(questRoleIndex === 0)//抽角色
+    {
+      // console.log(questRoleIndex);
+      // console.log(questIndex);
+      setQuestBase.questRoleIndex[catchIndex] = choiceRole();
+    }
+      setQuestBase.questIndex[catchIndex] = questIndex;//將進行到的題目存在跟IP索引一樣的位置
+    if(setQuestBase.questRoleIndex[catchIndex] === 1)//設定對應角色的題目，0: 未定，1:警察，2:律師, 3朋友, 4:家人:
+    {
+      setQuestBase.questRole = "警察";//題庫種類、角色種類名稱
+      if (questIndex === 0)//警察 第一題
+      {
+        setQuestBase.questBase[0] = "PQ:1";//題目，請在這更改正式的題目內容，P 警察代稱測試時使用，可覆寫
+      }
+      else if(questIndex === 1)//警察 第二題
+      {
+        setQuestBase.questBase[1] = "PQ2:";
+      }
+      else if(questIndex === 2)//警察 第三題
+      {
+        setQuestBase.questBase[2] = "PQ3:";
+      }
+    }
+    else if (setQuestBase.questRoleIndex[catchIndex] === 2)
+    {
+      setQuestBase.questRole = "律師";//題庫種類、角色種類名稱
+      if (questIndex === 0)//律師 第一題
+      {
+        setQuestBase.questBase[0] = "LQ:1";//題目，請在這更改正式的題目內容，L 律師代稱測試時使用，可覆寫
+      }
+      else if(questIndex === 1)//律師 第二題
+      {
+        setQuestBase.questBase[1] = "LQ2:";
+      }
+      else if(questIndex === 2)//律師 第三題
+      {
+        setQuestBase.questBase[2] = "LQ3:";
+      }
+    }
+    else  if (setQuestBase.questRoleIndex[catchIndex] === 3)
+    {
+      setQuestBase.questRole = "朋友";//題庫種類、角色種類名稱
+      if (questIndex === 0)//朋友 第一題
+      {
+        setQuestBase.questBase[0] = "FQ:1";//題目，請在這更改正式的題目內容，F 朋友代稱測試時使用，可覆寫
+      }
+      else if(questIndex === 1)//朋友 第二題
+      {
+        setQuestBase.questBase[1] = "FQ2:";
+      }
+      else if(questIndex === 2)//朋友 第三題
+      {
+        setQuestBase.questBase[2] = "FQ3:";
+      }
+    }
+    else if (setQuestBase.questRoleIndex[catchIndex] === 4)
+    {
+      setQuestBase.questRole = "家人";//題庫種類、角色種類名稱
+      if (questIndex === 0)//家人 第一題
+      {
+        setQuestBase.questBase[0] = "RQ:1";//題目，請在這更改正式的題目內容，R 家人代稱測試時使用，可覆寫
+      }
+      else if(questIndex === 1)//家人 第二題
+      {
+        setQuestBase.questBase[1] = "RQ2:";
+      }
+      else if(questIndex === 2)//家人 第三題
+      {
+        setQuestBase.questBase[2] = "RQ3:";
+      }
+    }
+    function choiceRole () {
+      let role = Math.floor(Math.random()*5)+1;
+      //Math.random取樹為0.0000~0.999，Math.floor為無條件捨去到比自身小的最大整數，這裡的範圍直為1~4
+      return role;
+    }
   });
+  socket.emit("setQuest",setQuestBase);//送回呼叫題庫的Client端(單一)
+});
 
 
 

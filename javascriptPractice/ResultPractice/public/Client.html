@@ -42,7 +42,7 @@
     <div class="row mt-3 align-self-center" >
         <!-----------計時---------->
         <div class="col-md-12 align-self-start mt-5">
-            <h4 class="text-center"> Count Down:</h4>
+            <h4 id="CountDown" class="text-center">搶救倒數:</h4>
         </div>
         <!----------計時---------->
     </div>
@@ -86,10 +86,12 @@
     <div class="row mt-3">
         <div class="col-md-12">
             <form>
-                <input type="text" name="answer" class="col justify-content-center" placeholder="請輸入答案">
+                <label for="inputAnswer" class="col-form-label font-weight-bold">來吧! 您心中真相是? </label>
+                <input id="inputAnswer" type="text" name="answer" class="col justify-content-center" placeholder="請輸入答案">
                 <input type="button" class="col btn btn-primary" onclick="answerCheck()" value="SUBMIT">
             </form>
         </div>
+        <div class="row mt-3"><p>0.0.2</p></div>
     </div>
     <!--container-fluid -->
 </div>
@@ -107,13 +109,22 @@
                 this.JoinName = JoinName;//體驗者名稱
                 this.SupName = [];//協助者名稱
                 this.catchIndex = 0;//取物索引
+                this.userRole = 0;//角色碼，0: 未定，1:警察，2:律師, 3朋友, 4:家人:
+            }
+        }
+        class Quest{//本客戶端問題庫
+            constructor() {
+                this.questRole =null;//題庫種類
+                this.questRoleIndex=0;//題庫種類索引
+                this.questIndex =0;//題庫索引，第幾題的意思
+                this.questBase ="";//題庫
             }
         }
         let localClient = new ClientSupport();
         let RestartClient = new ClientSupport();//重置/初始化Client端資料狀態
+        let setQuest = new Quest();//本Client題庫
 
-        ////////////////////////////////連接時同步www端資料/////////////
-        //Clinet端動到Join
+        ////////////////////////////////連接時同步www端資料，資料初始化/////////////
         io().on("Set",function (ClientIP,saveBase,catchIndex) {
             localClient.catchIndex = catchIndex;
             localClient.SupName = saveBase.users;
@@ -124,32 +135,57 @@
                 localClient.IP = ClientIP;
                 console.log("IP:"+ClientIP)
             }
+            // if(localClient.userRole === 0)//抽角色----->改成在www裡面抽
+            // {
+            //     localClient.userRole = choiceRole();
+            // }
+            ////////////////////////////////題目欄位/////////////
+            socket.emit("getQuest",localClient.userRole,setQuest.questIndex);//送出本Client題庫要求
+            io().on("setQuest",function (setQuestBase) {//取得題庫與角色相關資料
+                console.log(setQuestBase);
+                setQuest.questRole = setQuestBase.questRole;//取得角色種類名稱
+                setQuest.questRoleIndex = setQuestBase.questRoleIndex[catchIndex];//取得角色種類索引
+                setQuest.questIndex = setQuestBase.questIndex[catchIndex];//進行到第幾題
+                setQuest.questBase = setQuestBase.questBase[setQuest.questIndex];//取得題庫
+
+                document.getElementById("BoxTitle").innerHTML = localClient.user+"("+setQuest.questRole+"): 請完成以下挑戰";
+                document.getElementById("BoxContent").innerHTML = ""+setQuest.questBase;//取得題目
+            });
+            //////////////////////////////////下面處理區要一個全域溝通來處理////////////////////
+            ////////////////////////////////時間顯示/////////////
+            document.getElementById("CountDown").innerHTML = localClient.JoinName+"搶救倒數:";
+            document.getElementById("time").innerHTML ="00:00";
+            ////////////////////////////////角色顯示/////////////
+            let tempName =[];
+            let tempNameCount=0;
+            for(let index=0;index<localClient.SupName.length;index++)
+            {
+                if(localClient.SupName[index]!==undefined && localClient.SupName[index] !== localClient.user )//因方便測試，未掛上&& localClient.SupName[index] !== localClient.JoinName來避免顯示體驗者
+                {
+                    tempName[tempNameCount] = localClient.SupName[index];
+                    tempNameCount++;
+                }
+            }
+
+           // let tempName = localClient.SupName.map(showSupName);//取出正確的協助者名稱(其他人的)，角色種類名稱來自伺服端的題庫
+            document.getElementById("SupRole_1").innerHTML = tempName[0]+"("+  +"):";
+            document.getElementById("SupRole_2").innerHTML = tempName[1]+"("+  +"):";
+            document.getElementById("SupRole_3").innerHTML = tempName[2]+"("+  +"):";
+            tempNameCount=0;
+            ////////////////////////////////挑戰結果顯示/////////////
+            document.getElementById("fedBack_1").innerHTML = localClient.Join+"/1 位體驗者";
+            document.getElementById("fedBack_2").innerHTML = localClient.Join+"/1 位體驗者";
+            document.getElementById("fedBack_3").innerHTML = localClient.Join+"/1 位體驗者";
             console.log(localClient);
-        })
+            console.log(setQuest);
+        });
         ////////////////////////////////有Client端commit時同步www端資料/////////////
-        io().on("UpData",function (UpData) {
-            console.log("IP:"+localClient.IP)
-            console.log(localClient);
-        })
+
 
         ////////////////////////////////有Client端restart時重置Client端/////////////
         io().on("RestartClient",function () {
             localClient = RestartClient;
         })
-
-        ////////////////////////////////時間顯示/////////////
-        document.getElementById("time").innerHTML = localClient.SupName+"("+  +"):";
-        ////////////////////////////////角色顯示/////////////
-        document.getElementById("SupRole_1").innerHTML = localClient.SupName+"("+  +"):";
-        document.getElementById("SupRole_2").innerHTML = localClient.SupName+"("+  +"):";
-        document.getElementById("SupRole_3").innerHTML = localClient.SupName+"("+  +"):";
-        ////////////////////////////////挑戰結果顯示/////////////
-        document.getElementById("fedBack_1").innerHTML = localClient.Join+"/1 位體驗者";
-        document.getElementById("fedBack_2").innerHTML = localClient.Join+"/1 位體驗者";
-        document.getElementById("fedBack_3").innerHTML = localClient.Join+"/1 位體驗者";
-        ////////////////////////////////題目欄位/////////////
-        document.getElementById("BoxTitle").innerHTML = localClient.Join+"/1 位體驗者";
-        document.getElementById("BoxContent").innerHTML = localClient.Join+"/1 位體驗者";
     </script>
     <script>//bootstrap處理輸入錯誤JS原始碼
     // Example starter JavaScript for disabling form submissions if there are invalid fields

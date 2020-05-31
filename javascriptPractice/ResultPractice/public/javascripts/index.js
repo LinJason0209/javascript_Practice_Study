@@ -180,6 +180,19 @@ function catchJoinName(saveBase) {//取得體驗者名稱，透過找尋角色�
 function catchUserName(ClientIP) {
     let index = ClientIP
 }
+function showSupName(element) {
+    if(element !==undefined && element !== localClient.user)
+    {
+        return element;
+    }
+}
+// function tempNameList(tempName) {
+//     let index=0;
+//     if(tempName[index]===undefined)
+//     {
+//
+//     }
+// }
 function answerCheck() {///取得sumit資料來判斷答案是否正確
     let strUrl = location.href;
     let url = new URL(strUrl);
