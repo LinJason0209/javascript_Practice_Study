@@ -115,11 +115,17 @@ function startGame() {
         {
             if(localClient.rolelock === 1)
             {
+                let sents = urlAnalyst();
+                sentData(sents);
+                socket.emit("ClientUpData",localClient);//送出更新值給www端，因本Client端已更新故可在www端被複寫
                 localClient.GameLock = true;
                 location.href='Screen.html';
             }
             else if (localClient.rolelock === 2)
             {
+                let sents = urlAnalyst();
+                sentData(sents);
+                socket.emit("ClientUpData",localClient);//送出更新值給www端，因本Client端已更新故可在www端被複寫
                 location.href='Client.html';
             }
         }
@@ -127,9 +133,6 @@ function startGame() {
         {
             alert("請確認體驗者已參加，按下START");
         }
-        let sents = urlAnalyst();
-        sentData(sents);
-        socket.emit("ClientUpData",localClient);//送出更新值給www端，因本Client端已更新故可在www端被複寫
     }
     else
     {
@@ -176,5 +179,12 @@ function catchJoinName(saveBase) {//取得體驗者名稱，透過找尋角色�
 }
 function catchUserName(ClientIP) {
     let index = ClientIP
+}
+function answerCheck() {///取得sumit資料來判斷答案是否正確
+    let strUrl = location.href;
+    let url = new URL(strUrl);
+    let sents =[];
+    sents[0] = url.searchParams.get("answer")
+    return ;
 }
 

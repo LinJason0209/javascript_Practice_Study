@@ -7,9 +7,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>SUPPORT CHALLENGE!!</title>
+    <style type="text/css">
+        body {
+            background-image:url('images/message_frame.png');
+            background-repeat:no-repeat;
+            background-size: cover;
+            margin:0px;
+            padding:0px;
+            color: #f7f7f7;
+            text-align: center;
+            font-family: 'Times New Roman',"微軟正黑體", sans-serif !important;
+        }
+        .jumbotron {
+            background-image: url("images/game_screen.png");
+            color: white;
+            text-align: center;
+        }
+        .headline{
+            font-weight: bold;
+        }
+        .testColor{
+            background: #00B7FF;
+        }
+        .textEnd
+        {
+            text-align:start;
+        }
+    </style>
 </head>
-<body>
 
+<body>
+<div class="container">
+    <!--container-fluid -->
+    <div class="row mt-3 align-self-center" >
+        <!-----------計時---------->
+        <div class="col-md-12 align-self-start mt-5">
+            <h4 class="text-center"> Count Down:</h4>
+        </div>
+        <!----------計時---------->
+    </div>
+    <div class="row mt-3 align-self-center ">
+        <div class="col-md-12 align-self-center">
+            <h1 id="time" class="headline text-center">00:00</h1>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-7">
+            <h6 id="SupRole_1" class="headline"> 協助者 (角色):</h6>
+        </div>
+        <div class="col-4">
+            <h6 id="fedBack_1" class="headline textEnd"> 挑戰結果 / 效果</h6>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-7">
+            <h6 id="SupRole_2"  class="headline"> 協助者 (角色):</h6>
+        </div>
+        <div class="col-4">
+            <h6 id="fedBack_2" class="headline textEnd"> 挑戰結果 / 效果</h6>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-7">
+            <h6 id="SupRole_3" class="headline"> 協助者 (角色):</h6>
+        </div>
+        <div class="col-4">
+            <h6 id="fedBack_3" class="headline textEnd"> 挑戰結果 / 效果</h6>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-6 offset-md-3">
+            <div class="jumbotron img-rounded" style="background-size: cover" >
+                <h5 id="BoxTitle" class="headline text-dark "> 角色: 請完成以下挑戰 </h5>
+                <p id="BoxContent" class="headline text-muted mt-3">請在下方輸入刑法第幾條跟...與...相關</p>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <form>
+                <input type="text" name="answer" class="col justify-content-center" placeholder="請輸入答案">
+                <input type="button" class="col btn btn-primary" onclick="answerCheck()" value="SUBMIT">
+            </form>
+        </div>
+    </div>
+    <!--container-fluid -->
+</div>
 
 
     <!--javascript in this page -->
@@ -53,6 +136,20 @@
         io().on("RestartClient",function () {
             localClient = RestartClient;
         })
+
+        ////////////////////////////////時間顯示/////////////
+        document.getElementById("time").innerHTML = localClient.SupName+"("+  +"):";
+        ////////////////////////////////角色顯示/////////////
+        document.getElementById("SupRole_1").innerHTML = localClient.SupName+"("+  +"):";
+        document.getElementById("SupRole_2").innerHTML = localClient.SupName+"("+  +"):";
+        document.getElementById("SupRole_3").innerHTML = localClient.SupName+"("+  +"):";
+        ////////////////////////////////挑戰結果顯示/////////////
+        document.getElementById("fedBack_1").innerHTML = localClient.Join+"/1 位體驗者";
+        document.getElementById("fedBack_2").innerHTML = localClient.Join+"/1 位體驗者";
+        document.getElementById("fedBack_3").innerHTML = localClient.Join+"/1 位體驗者";
+        ////////////////////////////////題目欄位/////////////
+        document.getElementById("BoxTitle").innerHTML = localClient.Join+"/1 位體驗者";
+        document.getElementById("BoxContent").innerHTML = localClient.Join+"/1 位體驗者";
     </script>
     <script>//bootstrap處理輸入錯誤JS原始碼
     // Example starter JavaScript for disabling form submissions if there are invalid fields
