@@ -117,8 +117,8 @@ function startGame() {
             {
                 let sents = urlAnalyst();
                 sentData(sents);
-                socket.emit("ClientUpData",localClient);//送出更新值給www端，因本Client端已更新故可在www端被複寫
                 localClient.GameLock = true;
+                socket.emit("ClientUpData",localClient);//送出更新值給www端，因本Client端已更新故可在www端被複寫
                 location.href='Screen.html';
             }
             else if (localClient.rolelock === 2)

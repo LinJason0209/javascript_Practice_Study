@@ -115,6 +115,7 @@
         class Quest{//本客戶端問題庫
             constructor() {
                 this.questRole =null;//題庫種類
+                this.questRoles = [];//題庫種類，基本上userRole是它的索引值，主要用於意外處理
                 this.questRoleIndex=0;//題庫種類索引
                 this.questIndex =0;//題庫索引，第幾題的意思
                 this.questBase ="";//題庫
@@ -139,15 +140,21 @@
             // {
             //     localClient.userRole = choiceRole();
             // }
-            ////////////////////////////////題目欄位/////////////
+            ////////////////////////////////題目相關資訊初始化/////////////
             socket.emit("getQuest",localClient.userRole,setQuest.questIndex);//送出本Client題庫要求
-            io().on("setQuest",function (setQuestBase) {//取得題庫與角色相關資料
+            io().on("setQuest",function (setQuestBase,catchIndex) {//取得題庫與角色相關資料
                 console.log(setQuestBase);
-                setQuest.questRole = setQuestBase.questRole;//取得角色種類名稱
-                setQuest.questRoleIndex = setQuestBase.questRoleIndex[catchIndex];//取得角色種類索引
-                setQuest.questIndex = setQuestBase.questIndex[catchIndex];//進行到第幾題
-                setQuest.questBase = setQuestBase.questBase[setQuest.questIndex];//取得題庫
-
+                if(localClient.catchIndex === catchIndex)
+                {
+                    setQuest.questRole = setQuestBase.questRole;//取得角色種類名稱
+                    setQuest.questRoleIndex = setQuestBase.questRoleIndex[catchIndex];//取得角色種類索引
+                    setQuest.questIndex = setQuestBase.questIndex[catchIndex];//進行到第幾題
+                    setQuest.questBase = setQuestBase.questBase[setQuest.questIndex];//取得題庫
+                }
+                else
+                {
+                    setQuest.questRoles = setQuestBase.questRoleIndex;//questRoleIndex索引為catchIndex//其他協助者角色
+                }
                 document.getElementById("BoxTitle").innerHTML = localClient.user+"("+setQuest.questRole+"): 請完成以下挑戰";
                 document.getElementById("BoxContent").innerHTML = ""+setQuest.questBase;//取得題目
             });
@@ -156,28 +163,52 @@
             document.getElementById("CountDown").innerHTML = localClient.JoinName+"搶救倒數:";
             document.getElementById("time").innerHTML ="00:00";
             ////////////////////////////////角色顯示/////////////
+            //////////////////////////////初始化呈現文字///////////////////
             let tempName =[];
+            let tempRole =[];
+            let tempResult =[];
             let tempNameCount=0;
-            for(let index=0;index<localClient.SupName.length;index++)
-            {
-                if(localClient.SupName[index]!==undefined && localClient.SupName[index] !== localClient.user )//因方便測試，未掛上&& localClient.SupName[index] !== localClient.JoinName來避免顯示體驗者
+
+            for(let index=0;index<localClient.SupName.length;index++) {
+                if (localClient.SupName[index] !== undefined && localClient.SupName[index] !== localClient.user)//因方便測試，未掛上&& localClient.SupName[index] !== localClient.JoinName來避免顯示體驗者
                 {
                     tempName[tempNameCount] = localClient.SupName[index];
+                    tempRole[tempNameCount] = setQuest.questRoles[index];
+                    //tempResult[tempNameCount] = 0;//待設置
+
                     tempNameCount++;
                 }
             }
-
-           // let tempName = localClient.SupName.map(showSupName);//取出正確的協助者名稱(其他人的)，角色種類名稱來自伺服端的題庫
-            document.getElementById("SupRole_1").innerHTML = tempName[0]+"("+  +"):";
-            document.getElementById("SupRole_2").innerHTML = tempName[1]+"("+  +"):";
-            document.getElementById("SupRole_3").innerHTML = tempName[2]+"("+  +"):";
+            for(let index=0;index<4;index++)
+            {
+                if(tempName[index]===undefined)
+                {
+                    tempName[index] = "未加入";
+                }
+                if(tempRole[index]===undefined)
+                {
+                    tempRole[index] = "無職位";
+                }
+                if(tempResult[index]===undefined)
+                {
+                    tempResult[index] = "-- -- --";
+                }
+            }
+            // let tempName = localClient.SupName.map(showSupName);//取出正確的協助者名稱(其他人的)，角色種類名稱來自伺服端的題庫
+            document.getElementById("SupRole_1").innerHTML = tempName[0]+"("+ tempRole[0] +"):";
+            document.getElementById("SupRole_2").innerHTML = tempName[1]+"("+ tempRole[1] +"):";
+            document.getElementById("SupRole_3").innerHTML = tempName[2]+"("+ tempRole[2] +"):";
             tempNameCount=0;
             ////////////////////////////////挑戰結果顯示/////////////
-            document.getElementById("fedBack_1").innerHTML = localClient.Join+"/1 位體驗者";
-            document.getElementById("fedBack_2").innerHTML = localClient.Join+"/1 位體驗者";
-            document.getElementById("fedBack_3").innerHTML = localClient.Join+"/1 位體驗者";
+            document.getElementById("fedBack_1").innerHTML = tempResult[0];
+            document.getElementById("fedBack_2").innerHTML = tempResult[1];
+            document.getElementById("fedBack_3").innerHTML = tempResult[2];
             console.log(localClient);
             console.log(setQuest);
+            ////////////////////////////取得對答案的結果///////////////
+            io().on("setAnswer",function (result,effect,catchIndex) {
+
+            });
         });
         ////////////////////////////////有Client端commit時同步www端資料/////////////
 

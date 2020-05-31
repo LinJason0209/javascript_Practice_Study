@@ -110,6 +110,7 @@ io.on("connection",function (socket) {
     {
       // console.log(questRoleIndex);
       // console.log(questIndex);
+      console.log("SetQuestions");
       setQuestBase.questRoleIndex[catchIndex] = choiceRole();
     }
       setQuestBase.questIndex[catchIndex] = questIndex;//將進行到的題目存在跟IP索引一樣的位置
@@ -182,8 +183,148 @@ io.on("connection",function (socket) {
       //Math.random取樹為0.0000~0.999，Math.floor為無條件捨去到比自身小的最大整數，這裡的範圍直為1~4
       return role;
     }
+    socket.broadcast.emit("setQuest",setQuestBase,catchIndex);//送回呼叫題庫的Client端(單一)//PS: emit要在on外面io.on connect裡面
   });
-  socket.emit("setQuest",setQuestBase);//送回呼叫題庫的Client端(單一)
+
+  //////////////////////////////////////////////////伺服端答案庫建置，對答案，成敗反饋////////////////////////////
+  let result = false;
+  let effect;//回饋設置
+  socket.on("getAnswer",function (Role,questIndex,Answer) {//questRoleIndex決定角色，收到來自Client端的角色確認的數值，並將其當作選題索引，questRoleIndex: 控制角色種類,questIndex 控制該角色種類下第幾個題目
+    if(Role === 1)//設定對應角色的答案，0: 未定，1:警察，2:律師, 3朋友, 4:家人:
+    {
+      if (questIndex === 0)//警察 第一題
+      {
+        if("PA:1"=== Answer)//答案，請在這更改正式的答案內容，P 警察代稱測試時使用，可覆寫
+        {
+          result =true;
+        }
+      }
+      else if(questIndex === 1)//警察 第二題
+      {
+        if("PA:2"=== Answer)//答案，請在這更改正式的答案內容，P 警察代稱測試時使用，可覆寫
+        {
+          result =true;
+        }
+      }
+      else if(questIndex === 2)//警察 第三題
+      {
+        if("PA:3"=== Answer)//答案，請在這更改正式的答案內容，P 警察代稱測試時使用，可覆寫
+        {
+          result =true;
+        }
+      }
+      ///////////////////////////////////////答案反饋////////////////////////////目前先不設定，唯做測試用印出，等定案後再設置
+          if(result === true)
+          {
+            effect = "Success!";
+          }
+          else if (result === false)
+          {
+            effect = "Loser!";
+          }
+    }
+    else if (Role === 2)
+    {
+      if (questIndex === 0)//律師 第一題
+      {
+        if("LA:1"=== Answer)//答案，請在這更改正式的答案內容，L 律師代稱測試時使用，可覆寫
+        {
+          result =true;
+        }
+      }
+      else if(questIndex === 1)//律師 第二題
+      {
+        if("LA:2"=== Answer)//答案，請在這更改正式的答案內容，L 律師代稱測試時使用，可覆寫
+        {
+          result =true;
+        }
+      }
+      else if(questIndex === 2)//律師 第三題
+      {
+        if("LA:3"=== Answer)//答案，請在這更改正式的答案內容，L 律師代稱測試時使用，可覆寫
+        {
+          result =true;
+        }
+      }
+      ///////////////////////////////////////答案反饋////////////////////////////目前先不設定，唯做測試用印出，等定案後再設置
+      if(result === true)
+      {
+        effect = "Success!";
+      }
+      else if (result === false)
+      {
+        effect = "Loser!";
+      }
+    }
+    else  if (Role === 3)
+    {
+      if (questIndex === 0)//朋友 第一題
+      {
+        if("FA:1"=== Answer)//答案，請在這更改正式的答案內容，F 朋友代稱測試時使用，可覆寫
+        {
+          result =true;
+        }
+      }
+      else if(questIndex === 1)//朋友 第二題
+      {
+        if("FA:2"=== Answer)//答案，請在這更改正式的答案內容，F 朋友代稱測試時使用，可覆寫
+        {
+          result =true;
+        }
+      }
+      else if(questIndex === 2)//朋友 第三題
+      {
+        if("FA:3"=== Answer)//答案，請在這更改正式的答案內容，F 朋友代稱測試時使用，可覆寫
+        {
+          result =true;
+        }
+      }
+      ///////////////////////////////////////答案反饋////////////////////////////目前先不設定，唯做測試用印出，等定案後再設置
+      if(result === true)
+      {
+        effect = "Success!";
+      }
+      else if (result === false)
+      {
+        effect = "Loser!";
+      }
+    }
+    else if (Role === 4)
+    {
+      if (questIndex === 0)//家人 第一題
+      {
+        if("RA:1"=== Answer)//答案，請在這更改正式的答案內容，R 家人代稱測試時使用，可覆寫
+        {
+          result =true;
+        }
+      }
+      else if(questIndex === 1)//家人 第二題
+      {
+        if("RA:2"=== Answer)//答案，請在這更改正式的答案內容，R 家人代稱測試時使用，可覆寫
+        {
+          result =true;
+        }
+      }
+      else if(questIndex === 2)//家人 第三題
+      {
+        if("RA:3"=== Answer)//答案，請在這更改正式的答案內容，R 家人代稱測試時使用，可覆寫
+        {
+          result =true;
+        }
+      }
+      ///////////////////////////////////////答案反饋////////////////////////////目前先不設定，唯做測試用印出，等定案後再設置
+      if(result === true)
+      {
+        effect = "Success!";
+      }
+      else if (result === false)
+      {
+        effect = "Loser!";
+      }
+    }
+    socket.broadcast.emit("setAnswer",result,effect,catchIndex);//送回呼叫題庫的Client端(單一)//PS: emit要在on外面io.on connect裡面
+  });
+
 });
 
 
