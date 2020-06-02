@@ -244,8 +244,9 @@
     })
 
     ////////////////////////////////有Client端restart時重置Client端/////////////
-    io().on("RestartClient",function (RestartClient) {
+    io().on("RestartIndex",function () {
         localClient = RestartClient;
+        urlReset();
     })
 
 ///////////////////////以下JS原始碼 搬遷至index.js統一管理/////////////////

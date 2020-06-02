@@ -20,11 +20,11 @@ class saveServer{//www端儲存庫模板
     this.IP = [];//IP庫,不可覆寫
     this.Join = 0;//體驗者人數
     this.Sup = 0;//協助者人數
-    this.rolelocks = [];//角色庫，不可覆寫
-    this.users =[];//角色名稱庫
+    this.rolelocks = [];//體驗種類庫，不可覆寫，以catchIndex做索引
+    this.users =[];//角色名稱庫,以catchIndex做索引
+    this.userRoles=[];//角色種類庫
     this.JoinUserBirth = 0;//生日
     this.GameLock = false;
-    // this.joinlock = [];//鎖頭庫,不可覆寫
   }
 }
 class ServerQuest{//伺服端問題庫
@@ -33,9 +33,83 @@ class ServerQuest{//伺服端問題庫
     this.questRoleIndex = [];//題庫種類，基本上userRole是它的索引值，主要用於意外處理
     this.questIndex =[];//題庫索引，第幾題的意思
     this.questBase =[];//題庫
+    this.SuccessQuestBase = [];//用陣列存陣列，用來存放各Client端已完成的題目。以catchIndex做索引
   }
 }
-let setQuestBase = new ServerQuest();//題庫實例化
+///////////////////////////////////////////////題庫第二版///////////////////////////////////////
+class QuestRole {//角色題庫模板
+  constructor(name,quest) {
+    this.name = name;
+    this.quest = quest;
+    // this.firstQuest = firstQuest;
+    // this.secondQuest = secondQuest;
+    // this.thirdQuest = thirdQuest;
+  }
+}
+class AnswerRole {//角色答案
+  constructor(name,answer) {
+    this.name = name;
+    this.answer = answer;
+    // this.firstAnswer = firstAnswer;
+    // this.secondAnswer = secondAnswer;
+    // this.thirdAnswer = thirdAnswer;
+  }
+}
+class AnswerEffect{//反饋
+  constructor(success,fault) {
+    this.success = success;
+    this.fault = fault;
+  }
+}
+function getRole(){//選角
+  //Math.random取樹為0.0000~0.999，Math.floor為無條件捨去到比自身小的最大整數，這裡的範圍直為1~4
+  let role = Math.floor(Math.random()*5)+1;
+  return role;
+}
+function checkAnswer(answer,role,quest) {//對答案
+  return answer === AnswerDataBase[role].answer[quest];
+}
+function checkEffect(role,checkAnswer){//反饋
+  if(checkAnswer === true)
+  {
+    return  EffectDataBase[role].success;
+  }
+  else if(checkAnswer === false)
+  {
+    return  EffectDataBase[role].fault;
+  }
+}
+
+//題目
+let quest =[];
+let PoliceQuest = new QuestRole("警察",quest =["PQ:1","PQ:2","PQ:3"]);
+let LayerQuest = new QuestRole("律師",quest =["LQ:1","LQ:2","LQ:3"]);
+let FriendQuest = new QuestRole("朋友",quest =["FQ1","FQ2","FQ3"]);
+let RelativeQuest = new QuestRole("家人",quest =["RQ1","RQ2","RQ3"]);
+//答案
+let  answer=[];
+let PoliceAnswer = new AnswerRole("警察",answer=["PQ:1","PQ:2","PQ:3"]);
+let LayerAnswer = new AnswerRole("律師",answer=["LQ:1","LQ:2","LQ:3"]);
+let FriendAnswer = new AnswerRole("朋友",answer=["FQ1","FQ2","FQ3"]);
+let RelativeAnswer = new AnswerRole("家人",answer=["RQ1","RQ2","RQ3"]);
+//反饋
+let success=[];
+let fault=[];
+
+let PoliceEffect = new AnswerEffect(success=["GoodPolice","+P10",10],fault=["LoserPolice","-P10",-10]);
+let LayerEffect = new AnswerEffect(success=["GoodLayer","+L20",20], fault=["LoserLayer","-L20",-20]);
+let FriendEffect = new AnswerEffect(success=["GoodFriend","+F30",30],fault=["LoserFriend","-F30",-30]);
+let RelativeEffect = new AnswerEffect(success=["GoodRelative","+R40",40],fault=["LoserRelative","-R40",-40]);
+
+let QuestDataBase =[PoliceQuest,LayerQuest,FriendQuest,RelativeQuest];
+let AnswerDataBase =[PoliceAnswer,LayerAnswer,FriendAnswer,RelativeAnswer];
+let EffectDataBase = [PoliceEffect,LayerEffect,FriendEffect,RelativeEffect];
+
+
+///////////////////////////////////////////////題庫重置///////////////////////////////////////
+
+
+// let setQuestBase = new ServerQuest();//題庫實例化
 ///////////////////////////////////////////////////伺服端連線/資料交換///////////////////////////
 let serverClient = new saveClient();//建立www端物件來儲存接收資訊，可覆寫
 let RestartBase = new saveClient();//初始化www端資料庫
@@ -47,8 +121,6 @@ let catchIndex = 0;
  * socket.io Listen 
  */
 io.on("connection",function (socket) {
-  ////////////////抓本機虛擬IP///////////////////////////////////
-////////////失敗/////////////////////////
   //建立client端監測接收端，如監測到connection類型被client端丟出，則印出丟出的client IP
   /////////////////////////////////////////////初始化///////////////////////////////////////////
   let ClientIP = socket.handshake.address;//取得要求連線之IP位置
@@ -65,8 +137,9 @@ io.on("connection",function (socket) {
   {
     catchIndex = saveBase.IP.indexOf(ClientIP);//此Client端的取物索引
   }
-  socket.emit("Set",ClientIP,saveBase,catchIndex);//將IP、www端資料傳給Client端
-  // console.log("set: "+catchIndex)
+  console.log("IP: "+ClientIP);
+  console.log("SetIP_1: "+catchIndex);
+  socket.emit("Set",ClientIP,saveBase,catchIndex,QuestDataBase,AnswerDataBase,EffectDataBase);//將IP、www端資料傳給Client端
 
   function checkIP(element)
   {
@@ -81,10 +154,10 @@ io.on("connection",function (socket) {
   ///////////////////////////////////////////更新www端更新///////////////////////////////////
       saveBase.Join = serverClient.Join;//更新www端Join值
       saveBase.Sup = serverClient.Sup;//更新www端Sup值
-      
       catchIndex = saveBase.IP.indexOf(ClientIP);//取的此Client IP位於伺服端的儲存索引
-      saveBase.rolelocks[catchIndex] = serverClient.rolelock;//更新角色種類
+      saveBase.rolelocks[catchIndex] = serverClient.rolelock;//更新體驗種類
       saveBase.users[catchIndex] = serverClient.user;//更新角色名稱
+      //saveBase.userRoles[catchIndex] = serverClient.userRoles;//更新角色種類
       saveBase.GameLock = serverClient.GameLock;
 
       if(serverClient.rolelock ===1)
@@ -92,238 +165,327 @@ io.on("connection",function (socket) {
         saveBase.JoinUserBirth = serverClient.JoinBirth;//更新體驗者生日
       }
       socket.broadcast.emit("UpData", serverClient);
-      console.log("www Database SaveBase: "+" catchIndex:"+catchIndex);
-      console.log(saveBase);
-      console.log("www Database emit server: "+" catchIndex:"+catchIndex);
-      console.log(serverClient);
+      // console.log("www Database SaveBase: "+" catchIndex:"+catchIndex);
+      // console.log(saveBase);
+      // console.log("www Database emit server: "+" catchIndex:"+catchIndex);
+      // console.log(serverClient);
     });
   
-    socket.on("Restart",function (Restart) {
-      socket.broadcast.emit("RestartClient",Restart);
+    socket.on("RestartIndexWWW",function () {
+      socket.broadcast.emit("RestartIndex");
       saveBase = RestartBase;
-      console.log("www Database RestartBase: ");
-      console.log(saveBase);
+      // console.log("www Database RestartBase: ");
+      // console.log(saveBase);
     });
-//////////////////////////////////////////////////伺服端問題庫建置////////////////////////////
-  socket.on("getQuest",function (questRoleIndex,questIndex) {//questRoleIndex決定角色，收到來自Client端的角色確認的數值，並將其當作選題索引，questRoleIndex: 控制角色種類,questIndex 控制該角色種類下第幾個題目
-    if(questRoleIndex === 0)//抽角色
-    {
-      // console.log(questRoleIndex);
-      // console.log(questIndex);
-      console.log("SetQuestions");
-      setQuestBase.questRoleIndex[catchIndex] = choiceRole();
-    }
-      setQuestBase.questIndex[catchIndex] = questIndex;//將進行到的題目存在跟IP索引一樣的位置
-    if(setQuestBase.questRoleIndex[catchIndex] === 1)//設定對應角色的題目，0: 未定，1:警察，2:律師, 3朋友, 4:家人:
-    {
-      setQuestBase.questRole = "警察";//題庫種類、角色種類名稱
-      if (questIndex === 0)//警察 第一題
-      {
-        setQuestBase.questBase[0] = "PQ:1";//題目，請在這更改正式的題目內容，P 警察代稱測試時使用，可覆寫
-      }
-      else if(questIndex === 1)//警察 第二題
-      {
-        setQuestBase.questBase[1] = "PQ2:";
-      }
-      else if(questIndex === 2)//警察 第三題
-      {
-        setQuestBase.questBase[2] = "PQ3:";
-      }
-    }
-    else if (setQuestBase.questRoleIndex[catchIndex] === 2)
-    {
-      setQuestBase.questRole = "律師";//題庫種類、角色種類名稱
-      if (questIndex === 0)//律師 第一題
-      {
-        setQuestBase.questBase[0] = "LQ:1";//題目，請在這更改正式的題目內容，L 律師代稱測試時使用，可覆寫
-      }
-      else if(questIndex === 1)//律師 第二題
-      {
-        setQuestBase.questBase[1] = "LQ2:";
-      }
-      else if(questIndex === 2)//律師 第三題
-      {
-        setQuestBase.questBase[2] = "LQ3:";
-      }
-    }
-    else  if (setQuestBase.questRoleIndex[catchIndex] === 3)
-    {
-      setQuestBase.questRole = "朋友";//題庫種類、角色種類名稱
-      if (questIndex === 0)//朋友 第一題
-      {
-        setQuestBase.questBase[0] = "FQ:1";//題目，請在這更改正式的題目內容，F 朋友代稱測試時使用，可覆寫
-      }
-      else if(questIndex === 1)//朋友 第二題
-      {
-        setQuestBase.questBase[1] = "FQ2:";
-      }
-      else if(questIndex === 2)//朋友 第三題
-      {
-        setQuestBase.questBase[2] = "FQ3:";
-      }
-    }
-    else if (setQuestBase.questRoleIndex[catchIndex] === 4)
-    {
-      setQuestBase.questRole = "家人";//題庫種類、角色種類名稱
-      if (questIndex === 0)//家人 第一題
-      {
-        setQuestBase.questBase[0] = "RQ:1";//題目，請在這更改正式的題目內容，R 家人代稱測試時使用，可覆寫
-      }
-      else if(questIndex === 1)//家人 第二題
-      {
-        setQuestBase.questBase[1] = "RQ2:";
-      }
-      else if(questIndex === 2)//家人 第三題
-      {
-        setQuestBase.questBase[2] = "RQ3:";
-      }
-    }
-    function choiceRole () {
-      let role = Math.floor(Math.random()*5)+1;
-      //Math.random取樹為0.0000~0.999，Math.floor為無條件捨去到比自身小的最大整數，這裡的範圍直為1~4
-      return role;
-    }
-    socket.broadcast.emit("setQuest",setQuestBase,catchIndex);//送回呼叫題庫的Client端(單一)//PS: emit要在on外面io.on connect裡面
-  });
 
-  //////////////////////////////////////////////////伺服端答案庫建置，對答案，成敗反饋////////////////////////////
-  let result = false;
-  let effect;//回饋設置
-  socket.on("getAnswer",function (Role,questIndex,Answer) {//questRoleIndex決定角色，收到來自Client端的角色確認的數值，並將其當作選題索引，questRoleIndex: 控制角色種類,questIndex 控制該角色種類下第幾個題目
-    if(Role === 1)//設定對應角色的答案，0: 未定，1:警察，2:律師, 3朋友, 4:家人:
-    {
-      if (questIndex === 0)//警察 第一題
-      {
-        if("PA:1"=== Answer)//答案，請在這更改正式的答案內容，P 警察代稱測試時使用，可覆寫
-        {
-          result =true;
-        }
-      }
-      else if(questIndex === 1)//警察 第二題
-      {
-        if("PA:2"=== Answer)//答案，請在這更改正式的答案內容，P 警察代稱測試時使用，可覆寫
-        {
-          result =true;
-        }
-      }
-      else if(questIndex === 2)//警察 第三題
-      {
-        if("PA:3"=== Answer)//答案，請在這更改正式的答案內容，P 警察代稱測試時使用，可覆寫
-        {
-          result =true;
-        }
-      }
-      ///////////////////////////////////////答案反饋////////////////////////////目前先不設定，唯做測試用印出，等定案後再設置
-          if(result === true)
-          {
-            effect = "Success!";
-          }
-          else if (result === false)
-          {
-            effect = "Loser!";
-          }
-    }
-    else if (Role === 2)
-    {
-      if (questIndex === 0)//律師 第一題
-      {
-        if("LA:1"=== Answer)//答案，請在這更改正式的答案內容，L 律師代稱測試時使用，可覆寫
-        {
-          result =true;
-        }
-      }
-      else if(questIndex === 1)//律師 第二題
-      {
-        if("LA:2"=== Answer)//答案，請在這更改正式的答案內容，L 律師代稱測試時使用，可覆寫
-        {
-          result =true;
-        }
-      }
-      else if(questIndex === 2)//律師 第三題
-      {
-        if("LA:3"=== Answer)//答案，請在這更改正式的答案內容，L 律師代稱測試時使用，可覆寫
-        {
-          result =true;
-        }
-      }
-      ///////////////////////////////////////答案反饋////////////////////////////目前先不設定，唯做測試用印出，等定案後再設置
-      if(result === true)
-      {
-        effect = "Success!";
-      }
-      else if (result === false)
-      {
-        effect = "Loser!";
-      }
-    }
-    else  if (Role === 3)
-    {
-      if (questIndex === 0)//朋友 第一題
-      {
-        if("FA:1"=== Answer)//答案，請在這更改正式的答案內容，F 朋友代稱測試時使用，可覆寫
-        {
-          result =true;
-        }
-      }
-      else if(questIndex === 1)//朋友 第二題
-      {
-        if("FA:2"=== Answer)//答案，請在這更改正式的答案內容，F 朋友代稱測試時使用，可覆寫
-        {
-          result =true;
-        }
-      }
-      else if(questIndex === 2)//朋友 第三題
-      {
-        if("FA:3"=== Answer)//答案，請在這更改正式的答案內容，F 朋友代稱測試時使用，可覆寫
-        {
-          result =true;
-        }
-      }
-      ///////////////////////////////////////答案反饋////////////////////////////目前先不設定，唯做測試用印出，等定案後再設置
-      if(result === true)
-      {
-        effect = "Success!";
-      }
-      else if (result === false)
-      {
-        effect = "Loser!";
-      }
-    }
-    else if (Role === 4)
-    {
-      if (questIndex === 0)//家人 第一題
-      {
-        if("RA:1"=== Answer)//答案，請在這更改正式的答案內容，R 家人代稱測試時使用，可覆寫
-        {
-          result =true;
-        }
-      }
-      else if(questIndex === 1)//家人 第二題
-      {
-        if("RA:2"=== Answer)//答案，請在這更改正式的答案內容，R 家人代稱測試時使用，可覆寫
-        {
-          result =true;
-        }
-      }
-      else if(questIndex === 2)//家人 第三題
-      {
-        if("RA:3"=== Answer)//答案，請在這更改正式的答案內容，R 家人代稱測試時使用，可覆寫
-        {
-          result =true;
-        }
-      }
-      ///////////////////////////////////////答案反饋////////////////////////////目前先不設定，唯做測試用印出，等定案後再設置
-      if(result === true)
-      {
-        effect = "Success!";
-      }
-      else if (result === false)
-      {
-        effect = "Loser!";
-      }
-    }
-    socket.broadcast.emit("setAnswer",result,effect,catchIndex);//送回呼叫題庫的Client端(單一)//PS: emit要在on外面io.on connect裡面
-  });
+    socket.on("ClientResult",function (clientUser,clientUserRole,result,effect,catchIndex) {//www端接收成果後發送給全網
+      console.log("ClientResult:"+clientUser+clientUserRole+result+effect);
+      socket.broadcast.emit("SupportResult",clientUser,clientUserRole,result,effect,catchIndex);
+    })
+//////////////////////////////////////////////////伺服端問題庫建置////////////////////////////
+//    socket.on("getQuest",function (SuccessQuest,questIndex) {//questRoleIndex決定角色，收到來自Client端的角色確認的數值，並將其當作選題索引，questRoleIndex: 控制角色種類,questIndex 控制該角色種類下第幾個題目
+//     //setQuestBase.SuccessQuestBase[catchIndex] = SuccessQuest;//儲存已完成的題目
+//      //console.log("questIndex: "+questIndex);
+//      console.log("IP: "+ClientIP);
+//      console.log("getQuest_1: "+catchIndex);
+//      if(setQuestBase.questRoleIndex[catchIndex]  === undefined)//抽角色
+//     {
+//       setQuestBase.questRoleIndex[catchIndex] = choiceRole();
+//      // console.log("Role: "+setQuestBase.questRoleIndex[catchIndex]);
+//     }
+//      // if(setQuestBase.questIndex[catchIndex]  === undefined)//抽題目
+//      // {
+//      //   setQuestBase.questIndex[catchIndex] = choiceQuest ();
+//      // }
+//      // else
+//      // {
+//      setQuestBase.questIndex[catchIndex] = questIndex;
+//      // if(tempQuestPass.find(checkTemp) === undefined)
+//      // {
+//      //   tempQuestPass[tempindex]=questIndex;
+//      //   setQuestBase.questIndex[catchIndex] = questIndex;
+//      //   tempindex++;
+//      //   console.log(tempQuestPass);
+//      // }
+//      //
+//      // function checkTemp(element)
+//      // {
+//      //
+//      //   return element === questIndex;
+//      // }
+//      // }
+//
+//     // function checkRandom() {
+//     //    for(let index=0;index<setQuestBase.SuccessQuestBase[catchIndex].length;index++)
+//     //    {
+//     //      if(setQuestBase.questIndex[catchIndex]===setQuestBase.SuccessQuestBase[catchIndex][index])
+//     //      {
+//     //        setQuestBase.questIndex[catchIndex] = choiceQuest ();
+//     //        checkRandom();
+//     //      }
+//     //    }
+//     //  }
+//     //  checkRandom();
+//
+//
+//       //setQuestBase.questIndex[catchIndex] = questIndex;//將進行到的題目存在跟IP索引一樣的位置
+//     // console.log(setQuestBase.questRoleIndex[catchIndex]);
+//     // console.log( setQuestBase.questIndex[catchIndex]);
+//      //console.log("questIndex2: "+setQuestBase.questIndex[catchIndex]);
+//     if(setQuestBase.questRoleIndex[catchIndex] === 1)//設定對應角色的題目，0: 未定，1:警察，2:律師, 3朋友, 4:家人:
+//     {
+//       setQuestBase.questRole = "警察";//題庫種類、角色種類名稱
+//       if (setQuestBase.questIndex[catchIndex] === 0)//警察 第一題
+//       {
+//         setQuestBase.questBase[0] = "PQ:1";//題目，請在這更改正式的題目內容，P 警察代稱測試時使用，可覆寫
+//       }
+//       else if(setQuestBase.questIndex[catchIndex] === 1)//警察 第二題
+//       {
+//         setQuestBase.questBase[1] = "PQ2:";
+//       }
+//       else if(setQuestBase.questIndex[catchIndex] === 2)//警察 第三題
+//       {
+//         setQuestBase.questBase[2] = "PQ3:";
+//       }
+//     }
+//     else if (setQuestBase.questRoleIndex[catchIndex] === 2)
+//     {
+//       setQuestBase.questRole = "律師";//題庫種類、角色種類名稱
+//       if (setQuestBase.questIndex[catchIndex] === 0)//律師 第一題
+//       {
+//         setQuestBase.questBase[0] = "LQ:1";//題目，請在這更改正式的題目內容，L 律師代稱測試時使用，可覆寫
+//       }
+//       else if(setQuestBase.questIndex[catchIndex] === 1)//律師 第二題
+//       {
+//         setQuestBase.questBase[1] = "LQ2:";
+//       }
+//       else if(setQuestBase.questIndex[catchIndex] === 2)//律師 第三題
+//       {
+//         setQuestBase.questBase[2] = "LQ3:";
+//       }
+//     }
+//     else  if (setQuestBase.questRoleIndex[catchIndex] === 3)
+//     {
+//       setQuestBase.questRole = "朋友";//題庫種類、角色種類名稱
+//       if (setQuestBase.questIndex[catchIndex] === 0)//朋友 第一題
+//       {
+//         setQuestBase.questBase[0] = "FQ:1";//題目，請在這更改正式的題目內容，F 朋友代稱測試時使用，可覆寫
+//       }
+//       else if(setQuestBase.questIndex[catchIndex] === 1)//朋友 第二題
+//       {
+//         setQuestBase.questBase[1] = "FQ2:";
+//       }
+//       else if(setQuestBase.questIndex[catchIndex] === 2)//朋友 第三題
+//       {
+//         setQuestBase.questBase[2] = "FQ3:";
+//       }
+//     }
+//     else if (setQuestBase.questRoleIndex[catchIndex] === 4)
+//     {
+//       setQuestBase.questRole = "家人";//題庫種類、角色種類名稱
+//       if (setQuestBase.questIndex[catchIndex] === 0)//家人 第一題
+//       {
+//         setQuestBase.questBase[0] = "RQ:1";//題目，請在這更改正式的題目內容，R 家人代稱測試時使用，可覆寫
+//       }
+//       else if(setQuestBase.questIndex[catchIndex] === 1)//家人 第二題
+//       {
+//         setQuestBase.questBase[1] = "RQ2:";
+//       }
+//       else if(setQuestBase.questIndex[catchIndex] === 2)//家人 第三題
+//       {
+//         setQuestBase.questBase[2] = "RQ3:";
+//       }
+//     }
+//     function choiceRole () {
+//       let role = Math.floor(Math.random()*5)+1;
+//       //Math.random取樹為0.0000~0.999，Math.floor為無條件捨去到比自身小的最大整數，這裡的範圍直為1~4
+//       return role;
+//     }
+//     function checkQuest(element) {
+//       if(element === 0)
+//       {
+//
+//       }
+//       else if(element ===1)
+//       {
+//
+//       }
+//       else if(element ===2)
+//       {
+//
+//       }
+//     }
+//     function choiceQuest () {
+//       let quest = Math.floor(Math.random()*3);
+//       //Math.random取樹為0.0000~0.999，Math.floor為無條件捨去到比自身小的最大整數，這裡的範圍直為0~2
+//       return quest;
+//     }
+//      console.log("IP: "+ClientIP);
+//      console.log("getQuest_2: "+catchIndex);
+//     socket.broadcast.emit("setQuest",setQuestBase,catchIndex);//送回呼叫題庫的Client端(單一)//PS: emit要在on外面io.on connect裡面
+//  });
+
+//   //////////////////////////////////////////////////伺服端答案庫建置，對答案，成敗反饋////////////////////////////
+//   let result = false;
+//   let effect;//回饋設置
+//   socket.on("getAnswer",function (Role,questIndex,Answer) {//questRoleIndex決定角色，收到來自Client端的角色確認的數值，並將其當作選題索引，questRoleIndex: 控制角色種類,questIndex 控制該角色種類下第幾個題目
+//     //console.log("on.Role"+Role);
+//     //console.log("questFrom: "+questIndex);s
+//     console.log("IP:"+ClientIP+"getAnswerCatchIndex: "+catchIndex);
+//     console.log("Answer: "+Answer);
+//     if(Role === 1)//設定對應角色的答案，0: 未定，1:警察，2:律師, 3朋友, 4:家人:
+//     {
+//       if (questIndex === 0)//警察 第一題
+//       {
+//         if("PA:1"=== Answer)//答案，請在這更改正式的答案內容，P 警察代稱測試時使用，可覆寫
+//         {
+//           result =true;
+//         }
+//       }
+//       else if(questIndex === 1)//警察 第二題
+//       {
+//         if("PA:2"=== Answer)//答案，請在這更改正式的答案內容，P 警察代稱測試時使用，可覆寫
+//         {
+//           result =true;
+//         }
+//       }
+//       else if(questIndex === 2)//警察 第三題
+//       {
+//         if("PA:3"=== Answer)//答案，請在這更改正式的答案內容，P 警察代稱測試時使用，可覆寫
+//         {
+//           result =true;
+//         }
+//       }
+//       ///////////////////////////////////////答案反饋////////////////////////////目前先不設定，唯做測試用印出，等定案後再設置
+//           if(result === true)
+//           {
+//             effect = "Success!";
+//           }
+//           else if (result === false)
+//           {
+//             effect = "Loser!";
+//           }
+//     }
+//     else if (Role === 2)
+//     {
+//       if (questIndex === 0)//律師 第一題
+//       {
+//         if("LA:1"=== Answer)//答案，請在這更改正式的答案內容，L 律師代稱測試時使用，可覆寫
+//         {
+//           result =true;
+//         }
+//       }
+//       else if(questIndex === 1)//律師 第二題
+//       {
+//         if("LA:2"=== Answer)//答案，請在這更改正式的答案內容，L 律師代稱測試時使用，可覆寫
+//         {
+//           result =true;
+//         }
+//       }
+//       else if(questIndex === 2)//律師 第三題
+//       {
+//         if("LA:3"=== Answer)//答案，請在這更改正式的答案內容，L 律師代稱測試時使用，可覆寫
+//         {
+//           result =true;
+//         }
+//       }
+//       ///////////////////////////////////////答案反饋////////////////////////////目前先不設定，唯做測試用印出，等定案後再設置
+//       if(result === true)
+//       {
+//         effect = "Success!";
+//       }
+//       else if (result === false)
+//       {
+//         effect = "Loser!";
+//       }
+//     }
+//     else  if (Role === 3)
+//     {
+//       if (questIndex === 0)//朋友 第一題
+//       {
+//         if("FA:1"=== Answer)//答案，請在這更改正式的答案內容，F 朋友代稱測試時使用，可覆寫
+//         {
+//           result =true;
+//         }
+//       }
+//       else if(questIndex === 1)//朋友 第二題
+//       {
+//         if("FA:2"=== Answer)//答案，請在這更改正式的答案內容，F 朋友代稱測試時使用，可覆寫
+//         {
+//           result =true;
+//         }
+//       }
+//       else if(questIndex === 2)//朋友 第三題
+//       {
+//         if("FA:3"=== Answer)//答案，請在這更改正式的答案內容，F 朋友代稱測試時使用，可覆寫
+//         {
+//           result =true;
+//         }
+//       }
+//       ///////////////////////////////////////答案反饋////////////////////////////目前先不設定，唯做測試用印出，等定案後再設置
+//       if(result === true)
+//       {
+//         effect = "Success!";
+//       }
+//       else if (result === false)
+//       {
+//         effect = "Loser!";
+//       }
+//     }
+//     else if (Role === 4)
+//     {
+//       if (questIndex === 0)//家人 第一題
+//       {
+//         if("RA:1"=== Answer)//答案，請在這更改正式的答案內容，R 家人代稱測試時使用，可覆寫
+//         {
+//           result =true;
+//         }
+//       }
+//       else if(questIndex === 1)//家人 第二題
+//       {
+//         if("RA:2"=== Answer)//答案，請在這更改正式的答案內容，R 家人代稱測試時使用，可覆寫
+//         {
+//           result =true;
+//         }
+//       }
+//       else if(questIndex === 2)//家人 第三題
+//       {
+//         if("RA:3"=== Answer)//答案，請在這更改正式的答案內容，R 家人代稱測試時使用，可覆寫
+//         {
+//           result =true;
+//         }
+//       }
+//       ///////////////////////////////////////答案反饋////////////////////////////目前先不設定，唯做測試用印出，等定案後再設置
+//       if(result === true)
+//       {
+//         effect = "Success!";
+//       }
+//       else if (result === false)
+//       {
+//         effect = "Loser!";
+//       }
+//     }
+//     let tempRole ="";//不好的寫法但為了處理傳遞其他人的角色(((沒做好系統架構的錯QQ
+//     if(Role===1)
+//     {
+//       tempRole = "警察";
+//     }
+//     else if(Role===2)
+//     {
+//       tempRole = "律師";
+//     }
+//     else if(Role===3)
+//     {
+//       tempRole = "朋友";
+//     }
+//     else if(Role===4)
+//     {
+//       tempRole = "家人";
+//     }
+//     catchIndex = saveBase.IP.indexOf(ClientIP)
+// console.log("catchIndex"+catchIndex);
+//     socket.broadcast.emit("setAnswer",result,effect,catchIndex,tempRole,saveBase.users[catchIndex] );//送回呼叫題庫的Client端(單一)//PS: emit要在on外面io.on connect裡面
+//   });////////////////////////////////result=成功或失敗,effect=影響,catchIndex=確認接收目標,tempRole=角色種類(非catchIndex目標的其他協助者),saveBase.users[catchIndex]=協助者名稱(非catchIndex目標的其他協助者)
 
 });
 

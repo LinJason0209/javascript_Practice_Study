@@ -98,7 +98,17 @@ function urlReset() {
     }
     else
     {
-        location.href =("http://192.168.0.13:3000");//去除附帶參數,192.168.0.13需依照所在區域 WIFI 所提供給本機的虛擬IP做更改 ((再想到方法取虛擬IP前先這樣
+        location.href =("http://192.168.137.1:3000");//去除附帶參數,192.168.137.1本機預設內建區往虛擬碼(當WIFI時的IP)
+    }
+}
+function urlResetForClient() {
+    if(localClient.IP==="::ffff:127.0.0.1" || localClient.IP==="::1")
+    {
+        location.href =("http://localhost:3000/Client.html");
+    }
+    else
+    {
+        location.href =("http://192.168.137.1:3000//Client.html");//去除附帶參數,192.168.0.13需依照所在區域 WIFI 所提供給本機的虛擬IP做更改 ((再想到方法取虛擬IP前先這樣
     }
 }
 
@@ -159,8 +169,7 @@ function reStartGame(){
     {
         console.log(localClient.IP);
         console.log(localClient.GameLock);
-            socket.emit("Restart",RestartClient,function () {
-                urlReset();
+            socket.emit("RestartIndexWWW",function () {
             });
     }
     else if(localClient.GameLock === true)
@@ -193,11 +202,50 @@ function showSupName(element) {
 //
 //     }
 // }
-function answerCheck() {///取得sumit資料來判斷答案是否正確
-    let strUrl = location.href;
-    let url = new URL(strUrl);
-    let sents =[];
-    sents[0] = url.searchParams.get("answer")
-    return ;
+function answerSubmit() {
+    //let answer = "";
+    let formElement = document.getElementById("AnswerFrom");
+    result.answer = formElement[0].value;
+    console.log("answer:");
+    console.log(result.answer);
+    answerCheck(result.answer);
 }
+// function answerCheck(answer) {///取得sumit資料，並送到www判斷答案是否正確
+//     //socket.emit("getAnswer",setQuest.questRoleIndex,setQuest.questIndex,answer);//(Role,questIndex,Answer)
+// }
+// function simpleChoiceQuest(questIndex) {//自製語法糖，方便處理題目
+//     if(questIndex === 0)
+//     {
+//         return setQuest.questBase.firstQuest;
+//     }
+//     else if(questIndex === 1)
+//     {
+//         return setQuest.questBase.secondQuest;
+//     }
+//     else if(questIndex === 2)
+//     {
+//         return setQuest.questBase.thirdQuest;
+//     }
+// }
+function getRole(){//選角
+    //Math.random取樹為0.0000~0.999，Math.floor為無條件捨去到比自身小的最大整數，這裡的範圍直為1~4
+    let role = Math.floor(Math.random()*4)+0;
+    return role;
+}
+function checkAnswer(answer,role,quest) {//對答案
+    return answer === setQuest.AnswerDataBase[role].answer[quest];
+}
+function checkEffect(role,checkAnswer){//反饋
+    console.log("checkEffect: "+role+checkAnswer);
+    if(checkAnswer === true)
+    {
+        return  setQuest.EffectDataBase[role].success;
+    }
+    else if(checkAnswer === false)
+    {
+        return  setQuest.EffectDataBase[role].fault;
+    }
+}
+
+
 
