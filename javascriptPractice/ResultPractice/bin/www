@@ -162,6 +162,7 @@ io.on("connection",function (socket) {
 
       if(serverClient.rolelock ===1)
       {
+
         saveBase.JoinUserBirth = serverClient.JoinBirth;//更新體驗者生日
       }
       socket.broadcast.emit("UpData", serverClient);

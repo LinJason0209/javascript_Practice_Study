@@ -86,8 +86,9 @@ function cancelAdd(getId)
         localClient.Join -=1;//更新本Client端Sup值
         localClient.rolelock = undefined;
         console.log(localClient);
+        localClient.GameLock =false;
         socket.emit("ClientUpData",localClient);//送出更新值給www端，因本Client端已更新故可在www端被複寫，ClientUpData = 舊的JoinAdd，為了方便閱讀所以改名
-        document.getElementById("MemberSup").innerHTML = localClient.Sup+"/4 位協助者";
+        document.getElementById("MemberSup").innerHTML = localClient.Sup+"/1 位體驗者";
         urlReset();
     }
 }
@@ -131,12 +132,17 @@ function startGame() {
                 socket.emit("ClientUpData",localClient);//送出更新值給www端，因本Client端已更新故可在www端被複寫
                 location.href='Screen.html';
             }
-            else if (localClient.rolelock === 2)
+            if (localClient.rolelock === 2 && localClient.GameLock === true)
             {
                 let sents = urlAnalyst();
                 sentData(sents);
                 socket.emit("ClientUpData",localClient);//送出更新值給www端，因本Client端已更新故可在www端被複寫
                 location.href='Client.html';
+            }
+            else if(localClient.rolelock === 2)
+            {
+                console.log("in");
+                alert("請確認體驗者已參加，按下START");
             }
         }
         else
@@ -229,7 +235,7 @@ function answerSubmit() {
 // }
 function getRole(){//選角
     //Math.random取樹為0.0000~0.999，Math.floor為無條件捨去到比自身小的最大整數，這裡的範圍直為1~4
-    let role = Math.floor(Math.random()*4)+0;
+    let role = Math.floor(Math.random()*4)+0;//會回傳之間的隨機數字，*x)+y的意思為y~x的值
     return role;
 }
 function checkAnswer(answer,role,quest) {//對答案
@@ -245,6 +251,31 @@ function checkEffect(role,checkAnswer){//反饋
     {
         return  setQuest.EffectDataBase[role].fault;
     }
+}
+function countDownTimer(time) {//計時器
+    if (frameCount%60===0 && time>0)//60fps為1秒
+    {
+        time--;
+    }
+    else if (time===0)
+    {
+        time="GAME OVER";
+        console.log("chapterCount:"+chapterCount);
+        if(chapterCount+1>=chapterEndCount)
+        {
+            gameCondition = true;
+            gameScreen =2;
+        }
+        else
+        {
+            chapterCount++;//下一關
+            if(chapterCount+1<=chapterEndCount)
+            {
+                time = chapters[chapterCount].time;
+            }
+        }
+    }
+    return time;
 }
 
 
