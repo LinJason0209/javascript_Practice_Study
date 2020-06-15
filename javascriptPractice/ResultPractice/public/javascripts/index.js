@@ -252,8 +252,8 @@ function checkEffect(role,checkAnswer){//反饋
         return  setQuest.EffectDataBase[role].fault;
     }
 }
-function countDownTimer(time) {//計時器
-    if (frameCount%60===0 && time>0)//60fps為1秒
+function countDownTimer(time) {//計時器，兼處理換關處理
+    if (frameCount%30===0 && time>0)//60fps為1秒
     {
         time--;
     }
@@ -269,9 +269,12 @@ function countDownTimer(time) {//計時器
         else
         {
             chapterCount++;//下一關
+            gameScreen = 0;
             if(chapterCount+1<=chapterEndCount)
             {
                 time = chapters[chapterCount].time;
+                rightSpeed = chapters[chapterCount].rightSpeed;
+                upSpeed = chapters[chapterCount].upSpeed;
             }
         }
     }

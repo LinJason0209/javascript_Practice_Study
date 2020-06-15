@@ -75,3 +75,75 @@ io.sockets.on('connection', function(socket) {
     });
 
 });
+
+let cnvC;//畫布建置
+function windowResized() {//確保畫布畫面正常
+    centerCanvas();
+}
+function canvasC() {//底層畫布
+    centerCanvas();
+    cnvC.background(220);
+}
+function centerCanvas() {//畫布置中
+    let x = (windowWidth - width) / 2;
+    let y = (windowHeight - height) / 2;
+    cnvC.position(x,y);//console報錯的原因為需要p5js.dom函式庫，解法為換成最新版p5js.main
+}
+
+function setup() {
+    canvasC();
+}
+function draw() {
+    cnvC  = createCanvas(1280,720);//畫布大小
+}
+function change(card) {//翻牌
+    if(tempCheck === undefined)//如果沒翻過牌
+    {
+        tempCheck =  cards[1][0];//存下第一雌翻牌的物件
+        cards[1][0].cardShow.remove();//刪除原來的圖
+        cards[1][0].cardShow = undefined;//根除原來的圖的物件
+        cards[1][0].cardCheck = true;//確認翻牌(節約資源用)
+        cards[1][0].display();//產生翻面
+    }
+    else
+    {
+        cards[1][0].cardShow.remove();//刪除原來的圖
+        cards[1][0].cardShow = undefined;//根除原來的圖的物件
+        cards[1][0].cardCheck = true;//確認翻牌(節約資源用)
+        cards[1][0].display();//產生翻面
+        setTimeout(checkSame,500);//延遲執行
+    }
+}
+function checkSame() {
+    if(cards[1][0].ID === tempCheck.ID)//對照是否相同ID
+    {
+        cards[1][0].cardShow.remove();//刪除第二次翻面的物件原來的圖
+        tempCheck.cardShow.remove();//刪除第一次翻面的物件原來的圖
+
+
+        if(chapters[chapterCount].finishCount>0)
+        {
+            tint(255, 255/(chapters[chapterCount].finishCount/2));//225為0%透明，0為100%透明
+            cnvL.image(stageLoadImg[2],0,70,350,450);//畫出此關卡目標圖案背景
+            chapters[chapterCount].finishCount -= 2;//增加成功刪除的卡片數
+        }
+        else if(chapters[chapterCount].finishCount<=0)
+        {
+            chapterCount+=1;//下一關
+            gameScreen = 0;
+        }
+        //cards[1][0].cardShow  = undefined;//根除原來的圖的物件
+        //cards[1][0].cardCheck = false;//確認第二次事件的翻牌(節約資源用)
+    }
+    else
+    {
+        cards[1][0].cardShow.remove();//刪除第二次翻面的物件原來的圖
+        tempCheck.cardShow.remove();//刪除第一次翻面的物件原來的圖
+        cards[1][0].cardShow = undefined;//根除原來的圖的物件
+        tempCheck.cardShow = undefined;//根除原來的圖的物件
+        cards[1][0].cardCheck = false;
+        tempCheck.cardCheck = false;
+        // cards[1][0].display();
+        // tempCheck.display();
+    }
+}
