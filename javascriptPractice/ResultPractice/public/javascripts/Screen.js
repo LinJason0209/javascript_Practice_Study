@@ -25,7 +25,7 @@ let cardNormal;//卡片背面
 let tempCheck = undefined;//暫存第一次翻排
 let button;//------------------------------------------------------------------------------->
 
-let rangeWidth = 250;//布局卡片區範圍
+let rangeWidth = 500;//布局卡片區範圍
 let rangeHeight = 300;//布局卡片區範圍
 let startRange = [370,100];//布局卡片區起始範圍，左上
 let endRange = [750,400];//布局卡片區結束範圍，右下
@@ -130,19 +130,19 @@ class cardData {//設置卡片模板
         this.cardwidth = width;//排卡片時設定，長
         this.cardHeight = Height;//牌卡片時設定，高
         this.cardImg = img;
-        this.cardShow=undefined;//呈現卡片用物件
+        this.cardShow = undefined;//呈現卡片用物件
     }
     display()
     {
         if(this.cardCheck === false)
         {
             this.cardShow = createImg('images/card_b.png');
-            this.cardShow.position(190+this.ID*100, 100);
+            this.cardShow.position(this.cardwidth, this.cardHeight);//            this.cardShow.position(190+this.ID*100, 100);
         }
         else if(this.cardCheck === true)
         {
             this.cardShow = createImg(this.cardImg);
-            this.cardShow.position(190+this.ID*100, 100);
+            this.cardShow.position(this.cardwidth, this.cardHeight);//            this.cardShow.position(190+this.ID*100, 100);
         }
     }
 }
@@ -154,22 +154,72 @@ let chapterCount = 0;//當前關卡///////////////新增關卡屬性值，需在
 ///////////////////////////////////設置關卡//////////////////
 ///////////////////////////////////設置卡片//////////////////
 let cards=[];
-// let cardRs =[];
-// let cardCs =[];
+let loadIndex =0;
+let cardCount;//用於奇偶換算
+let cardCount_2;//用於判斷奇偶數
 
-for(let ichapterCount=1;ichapterCount<=chapters.length;ichapterCount++)
-{
-    for(let i=0;i<(chapters[ichapterCount-1].cardCount-1)/2;i++)//將卡片物件放入陣列
+    for(let ichapterCount=1;ichapterCount<=chapters.length;ichapterCount++)//ichapterCount=1為第一關第一個判斷是否小於關卡總數
     {
-        chapters[ichapterCount-1].card[i]= new cardData();
-        chapters[ichapterCount-1].card[i].ID = i;
-        chapters[ichapterCount-1].card[i].setSquare = Math.sqrt(chapters[chapterCount].cardCount);
-        chapters[ichapterCount-1].card[i].cardwidth = chapters[chapterCount].cardwidth;
-        chapters[ichapterCount-1].card[i].cardHeight = chapters[chapterCount].cardHeight;
-        chapters[ichapterCount-1].card[i].cardImg  = "images/card_f_"+(chapterCount+1)+"_"+(i+1)+".png";
+        if(((chapters[ichapterCount-1].cardCount-1)/2)%2 !== 0)//將卡片種類值整數化
+        {
+            cardCount = ((chapters[ichapterCount-1].cardCount-1)/2)+0.5;
+        }
+        else {
+            cardCount = ((chapters[ichapterCount-1].cardCount-1)/2);
+        }
+
+        if((chapters[ichapterCount-1].cardCount)%2!==0)//判斷關卡的卡片總數為奇或偶數
+        {
+            cardCount_2 = (chapters[ichapterCount-1].cardCount-1);//為奇數時
+        }
+        else
+        {
+            cardCount_2 = (chapters[ichapterCount-1].cardCount);//為偶數時
+        }
+
+        for(let i=0;i<chapters[ichapterCount-1].cardCount;i++)//將卡片物件放入陣列//ichapterCount-1為chapters中的第一關，第二個為判斷關卡中的卡片種類數for(let i=0;i<(chapters[ichapterCount-1].cardCount-1)/2;i++)
+        {
+            if(i>=(cardCount_2))
+            {
+                chapters[ichapterCount-1].card[i]= new cardData();
+                chapters[ichapterCount-1].card[i].ID = null;
+                chapters[ichapterCount-1].card[i].setSquare = Math.sqrt(chapters[ichapterCount-1].cardCount);
+                chapters[ichapterCount-1].card[i].cardwidth = chapters[ichapterCount-1].cardwidth;
+                chapters[ichapterCount-1].card[i].cardHeight = chapters[ichapterCount-1].cardHeight;
+                chapters[ichapterCount-1].card[i].cardImg  ="images/card_f_"+(chapterCount+1)+"_n.png";
+            }
+            else
+            {
+                chapters[ichapterCount-1].card[i]= new cardData();
+                chapters[ichapterCount-1].card[i].ID = loadIndex;
+                chapters[ichapterCount-1].card[i].setSquare = Math.sqrt(chapters[ichapterCount-1].cardCount);
+                chapters[ichapterCount-1].card[i].cardwidth = chapters[ichapterCount-1].cardwidth;
+                chapters[ichapterCount-1].card[i].cardHeight = chapters[ichapterCount-1].cardHeight;
+                chapters[ichapterCount-1].card[i].cardImg  = "images/card_f_"+(ichapterCount)+"_"+(loadIndex+1)+".png";
+            }
+           // console.log("sort: "+(cardCount-1));
+            //console.log("index: "+i+"chapter: "+ichapterCount+"card: "+(loadIndex+1)+"ID: "+ chapters[ichapterCount-1].card[i].ID);
+            if(loadIndex<cardCount-1)
+            {
+                loadIndex +=1;
+            }
+            else {
+                loadIndex =0
+            }
+        }
+        loadIndex =0;
+        cards[ichapterCount] = chapters[ichapterCount-1].card;
+         console.log("cardCount: "+(chapters[ichapterCount-1].cardCount-1)/2);
     }
-    cards[ichapterCount] = chapters[ichapterCount-1].card;
-}
+
+//console.log("cards: "+cards[1].length);
+    for(let chapterCounti=0;chapterCounti<chapters.length;chapterCounti++)
+    {
+        for(let i=0;i<chapters[chapterCounti].cardCount;i++)
+        {
+            //console.log("img: "+chapters[chapterCounti].card[i].cardImg);
+        }
+    }
 
 // cards[0] = new cardData();
 // cards[0].ID = 0;
@@ -248,86 +298,100 @@ function drawCnvL() {//line對話畫面畫布
     //         cnvL.image(cardNormal,370+cards[i].cardwidth*i,100,cards[i].cardwidth,cards[i].cardHeight);
     //     }
     // }
-        if(cards[1][0].cardShow ===undefined)//卡片產生//此處判定是否有產生過牌，若有就忽視以避免重複畫圖造成的資源耗損
-        {
-            // button = createImg('images/card_b.png');//button測試用，暫時代表呈現的卡片物件
-            // button.position(190, 100);
-            // button.mousePressed(change);
-            cards[1][0].display();
-            // card = cards[1][0];
-            cards[1][0].cardShow.mousePressed(function () {change(cards[1][0])});//監聽事件，設置好就會一直監聽，雙的function設計是為了可以傳參數
-           //  kill = cards[1][0].cardShow;
-           //   cards[1][0].cardShow.mousePressed(test);
-        }
-
-    if(cards[1][1].cardShow ===undefined)//卡片產生//此處判定是否有產生過牌，若有就忽視以避免重複畫圖造成的資源耗損
+    for(let row=0;row<cards[chapterCount+1].length;row++)
     {
-        // button = createImg('images/card_b.png');//button測試用，暫時代表呈現的卡片物件
-        // button.position(190, 100);
-        // button.mousePressed(change);
-        cards[1][1].display();
-        cards[1][1].cardShow.position(390, 100);
-        // card = cards[1][1];
-        cards[1][1].cardShow.mousePressed(function () {change(cards[1][1])});//監聽事件，設置好就會一直監聽
-        //  kill = cards[1][0].cardShow;
-        //   cards[1][0].cardShow.mousePressed(test);
-    }
-        // function test() {
-        //     kill.remove();
-        //     console.log(kill);
-        // }
-    function change(card) {//翻牌
-        if(tempCheck === undefined)//如果沒翻過牌
+        if(cards[chapterCount+1][row].cardShow === undefined)//卡片產生//此處判定是否有產生過牌，若有就忽視以避免重複畫圖造成的資源耗損
         {
-            tempCheck =  card;//存下第一雌翻牌的物件
-            card.cardShow.remove();//刪除原來的圖
-            card.cardShow = undefined;//根除原來的圖的物件
-            card.cardCheck = true;//確認翻牌(節約資源用)
-            card.display();//產生翻面
-        }
-        else
-        {
-            card.cardShow.remove();//刪除原來的圖
-            card.cardShow = undefined;//根除原來的圖的物件
-            card.cardCheck = true;//確認翻牌(節約資源用)
-            card.display();//產生翻面
-            setTimeout(function () {checkSame(card)},500);//延遲執行
+           // console.log(cards[chapterCount+1].length);
+            cards[chapterCount+1][row].display();
+            cards[chapterCount+1][row].cardShow.position(cards[chapterCount+1][row].cardwidth*(row+1), cards[chapterCount+1][row].cardHeight*(row+1));//創卡牌時定位
+            cards[chapterCount+1][row].cardShow.cardwidth = cards[chapterCount+1][row].cardwidth*(row+1);
+            cards[chapterCount+1][row].cardShow.cardHeight = cards[chapterCount+1][row].cardHeight*(row+1);
+            cards[chapterCount+1][row].cardShow.mousePressed(function () {change(chapterCount+1,row,cards[chapterCount+1][row].ID)});//監聽事件，設置好就會一直監聽，雙的function設計是為了可以傳參數
+            //console.log("Card.ID: "+cards[chapterCount+1][row].ID);
         }
     }
-    function checkSame(card) {
-        // console.log("tempCheck.ID: "+tempCheck.ID);
-        // console.log("card.ID: "+card.ID);
-        if(card.ID === tempCheck.ID)//對照是否相同ID
+    // if(cards[1][1].cardShow ===undefined)//卡片產生//此處判定是否有產生過牌，若有就忽視以避免重複畫圖造成的資源耗損(此處為測試用)
+    // {
+    //     // button = createImg('images/card_b.png');//button測試用，暫時代表呈現的卡片物件
+    //     // button.position(190, 100);
+    //     // button.mousePressed(change);
+    //     cards[1][1].display();
+    //     cards[1][1].cardShow.position(390, 100);
+    //     // card = cards[1][1];
+    //     cards[1][1].cardShow.mousePressed(function () {change(cards[1][1])});//監聽事件，設置好就會一直監聽
+    //     //  kill = cards[1][0].cardShow;
+    //     //   cards[1][0].cardShow.mousePressed(test);
+    // }
+    //     // function test() {
+    //     //     kill.remove();
+    //     //     console.log(kill);
+    //     // }////次處為測試用
+    let changeLock = false;//避免未處理完又再翻牌
+    function change(cardCount,row,ID) {//翻牌
+        if(changeLock === false)
         {
-            card.cardShow.remove();//刪除第二次翻面的物件原來的圖
-            tempCheck.cardShow.remove();//刪除第一次翻面的物件原來的圖
-
+            changeLock=true;
+            if(tempCheck === undefined)//如果沒翻過牌
+            {
+                tempCheck =  [ID,cardCount,row];//存下第一雌翻牌的物件
+                cards[cardCount][row].cardShow.remove();//刪除原來的圖
+                cards[cardCount][row].cardShow = undefined;//根除原來的圖的物件
+                cards[cardCount][row].cardCheck = true;//確認翻牌(節約資源用)
+                cards[cardCount][row].display();//產生翻面
+                changeLock=false;
+            }
+            else
+            {
+                cards[cardCount][row].cardShow.remove();//刪除原來的圖
+                cards[cardCount][row].cardShow = undefined;//根除原來的圖的物件
+                cards[cardCount][row].cardCheck = true;//確認翻牌(節約資源用)
+                cards[cardCount][row].display();//產生翻面
+                setTimeout(function () {checkSame(cardCount,row)},500);//延遲執行
+            }
+            cards[cardCount][row].cardShow.position(cards[chapterCount+1][row].cardwidth*(row+1), cards[chapterCount+1][row].cardHeight*(row+1));//翻卡牌時定位
+            cards[cardCount][row].cardShow.cardwidth = cards[chapterCount+1][row].cardwidth*(row+1);
+            cards[cardCount][row].cardShow.cardHeight = cards[chapterCount+1][row].cardHeight*(row+1);
+        }
+    }
+    function checkSame(cardCount,row) {
+        console.log("tempCheck.ID: "+tempCheck[0]);
+        console.log("card.ID: "+cards[cardCount][row].ID);
+        if(cards[cardCount][row].ID === tempCheck[0])//對照是否相同ID
+        {
+            cards[cardCount][row].cardShow.remove();//刪除第二次翻面的物件原來的圖
+            cards[tempCheck[1]][tempCheck[2]].cardShow.remove();//刪除第一次翻面的物件原來的圖
+            //cards[cardCount][row].cardShow = undefined;//根除原來的圖的物件
+            tempCheck = undefined;//根除原來的圖的物件
             if(chapters[chapterCount].finishCount>0)
             {
-                tint(255, 255/(chapters[chapterCount].finishCount/2));//225為0%透明，0為100%透明
-                cnvL.image(chapters[chapterCount].goalImg,30,100,280,320);//畫出此關卡目標圖案
+                // tint(255, 255/(chapters[chapterCount].finishCount/2));//225為0%透明，0為100%透明
+                // cnvL.image(chapters[chapterCount].goalImg,30,100,280,320);//畫出此關卡目標圖案
                 chapters[chapterCount].finishCount -= 2;//增加成功刪除的卡片數
+                console.log(".finishCount: "+chapters[chapterCount].finishCount);
+                if(chapters[chapterCount].finishCount<=0)
+                {
+                    chapterCount+=1;//下一關
+                    gameScreen = 0;
+                }
             }
             else if(chapters[chapterCount].finishCount<=0)
             {
                 chapterCount+=1;//下一關
                 gameScreen = 0;
             }
-            //cards[1][0].cardShow  = undefined;//根除原來的圖的物件
-            //cards[1][0].cardCheck = false;//確認第二次事件的翻牌(節約資源用)
         }
         else
         {
-            card.cardShow.remove();//刪除第二次翻面的物件原來的圖
-            tempCheck.cardShow.remove();//刪除第一次翻面的物件原來的圖
-            card.cardShow = undefined;//根除原來的圖的物件
-            tempCheck.cardShow = undefined;//根除原來的圖的物件
-            card.cardCheck = false;
-            tempCheck.cardCheck = false;
+            cards[cardCount][row].cardShow.remove();//刪除第二次翻面的物件原來的圖
+            cards[tempCheck[1]][tempCheck[2]].cardShow.remove();//刪除第一次翻面的物件原來的圖
+            cards[cardCount][row].cardShow = undefined;//根除原來的圖的物件
+            cards[tempCheck[1]][tempCheck[2]].cardShow = undefined;//根除原來的圖的物件
+            cards[cardCount][row].cardCheck = false;
+            cards[tempCheck[1]][tempCheck[2]].cardCheck = false;
             tempCheck = undefined;//初始化暫存區
-            // cards[1][0].display();
-            // tempCheck.display();
         }
+        changeLock=false;
     }
     // if(cards[1][0].cardCheck === false)//卡片誕生器 = chapters[1].card[0].cardCheck === false
     // {
@@ -444,17 +508,8 @@ function preload() {//載入圖片進緩衝區
 function change() {
     button.remove();
     cardCheck = true;
-    // button = createImg('images/photo_1_1.png');
-    // button.position(190, 100);
 }
 function setup() {
-    // cardNormal = createImg("images/card_b.png");//載入預設卡片之背面
-    // cardNormal .position(0,0);
-    // cardNormal .mousePressed(changeSupImg);
-    // function changeSupImg() {
-    //     cardNormal = createImage('images/photo_1.png');
-    //     cardNormal .position(0,0);
-    // }
     cnvC  = createCanvas(1280,720);//畫布大小
     cnvR  = createGraphics(300, 400);
     cnvL  = createGraphics(1280, 720);
