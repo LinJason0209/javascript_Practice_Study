@@ -240,7 +240,7 @@
         });
         ////////////////////////////////處理答案反饋/////////////////////////////////////////////////////
         function answerCheck(answer) {
-                result.result = checkAnswer(answer,localClient.userRole,setQuest.questIndex);
+                result.result = checkAnswer(answer,localClient.userRole,setQuest.questIndex);//checkAnswer回傳值為true
                 console.log("Result: "+result);
                 if(result.result === true)
                 {

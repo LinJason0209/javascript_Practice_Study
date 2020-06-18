@@ -147,3 +147,86 @@ function checkSame() {
         // tempCheck.display();
     }
 }
+
+// if(cards[1][0].cardCheck === false)//卡片誕生器 = chapters[1].card[0].cardCheck === false
+// {
+//     if(button===undefined)
+//     {
+//         button = createImg('images/card_b.png');//button測試用，暫時代表呈現的卡片物件
+//         button.position(190, 100);
+//         button.mousePressed(change);
+//
+//     }
+// }
+// else
+// {
+//     if(button===undefined)
+//     {
+//         button = createImg(chapters[1].card[0].cardImg );
+//         button.position(190, 100);
+//
+//     }
+// }
+// for(let iR=0;iR<(Math.sqrt(chapters[chapterCount].cardCount));iR++)//橫排
+// {
+//     for(let iC=0;iC<(Math.sqrt(chapters[chapterCount].cardCount));iC++)//直排
+//     {
+//         cnvL.image(cardNormal,);
+//     }
+// }
+//
+// for(let i=0;i<chapters[chapterCount].cardCount;i++)
+// {
+//      // for(let ir=1;ir<=Math.sqrt(chapters[chapterCount].cardCount);ir++)//橫的圖卡
+//      // {
+//      //      console.log("cardCount: "+Math.sqrt(chapters[chapterCount].cardCount));
+//      //    //console.log("row: "+startRange[0]*ir);
+//      //     cnvL.image(cardNormal,startRange[0]+chapters[chapterCount].cardwidth*ir-1,startRange[1],chapters[chapterCount].cardwidth-50,chapters[chapterCount].cardHeight);//畫出卡片 104,138，布局範圍: 左上400,100，右下750,400
+//      //
+//      // }
+//      // for(let ic=1;ic<=Math.sqrt(chapters[chapterCount].cardCount);ic++)//立的圖卡
+//      // {
+//      //     //console.log("col: "+startRange[1]*ic);
+//      //     cnvL.image(cardNormal,startRange[0],startRange[1]+chapters[chapterCount].cardHeight*ic-1,chapters[chapterCount].cardwidth-50,chapters[chapterCount].cardHeight);//畫出卡片 104,138，布局範圍: 左上400,100，右下750,400
+//      // }
+//
+//      // cnvL.image(cardNormal,startRange[0],startRange[1],chapters[chapterCount].cardwidth-50,chapters[chapterCount].cardHeight);//畫出卡片 104,138，布局範圍: 左上400,100，右下750,400
+//      // cnvL.image(cardNormal,endRange[0],endRange[1],chapters[chapterCount].cardwidth-50,chapters[chapterCount].cardHeight);//畫出卡片 104,138，布局範圍: 左上400,100，右下750,400
+//  }
+// for(let i=0;i<chapters[chapterCount].cardCount;i++)//創造按鈕化卡片
+// {
+//     cardButton[1] = createButton('click me');
+//     cardButton[1].background(cardNormal);
+//     // cardButton[i].background(chapters[chapterCount].card[i]);
+//     cardButton[1].position(19, 19);
+//     cardButton[1].mousePressed(check(1));//
+// }
+// cardNormal = createImg(100,100);//載入預設卡片之背面
+// img.loadPixels();
+// labelImg[0].display();//測試用，估算位置
+
+// cards[cardCount][row].cardShow.position(cards[chapterCount+1][row].cardwidth*(row+1), cards[chapterCount+1][row].cardHeight*(row+1));//翻卡牌時定位
+// cards[cardCount][row].cardShow.cardwidth = cards[chapterCount+1][row].cardwidth*(row+1);
+// cards[cardCount][row].cardShow.cardHeight = cards[chapterCount+1][row].cardHeight*(row+1);
+
+//
+// for(let i=0;i<chapters[chapterCount].cardCount;i++)
+// {
+//     cards[i] = card;
+//     cards[i].ID = i;
+//     cards[i].setSquare = Math.sqrt(chapters[chapterCount].cardCount);
+//     cards[i].cardwidth = chapters[chapterCount].cardwidth;
+//     cards[i].cardHeight = chapters[chapterCount].cardHeight;
+// }
+// for(let i=0;i<chapters[chapterCount].cardCount;i++)
+// {
+//     console.log();
+//     if(cards[i].ID%cards[i].setSquare===0)
+//     {
+//         cnvL.image(cardNormal,370,100+cards[i].cardHeight*i,cards[i].cardwidth,cards[i].cardHeight);
+//     }
+//     else
+//     {
+//         cnvL.image(cardNormal,370+cards[i].cardwidth*i,100,cards[i].cardwidth,cards[i].cardHeight);
+//     }
+// }

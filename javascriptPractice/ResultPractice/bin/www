@@ -179,7 +179,7 @@ io.on("connection",function (socket) {
       // console.log(saveBase);
     });
 
-    socket.on("ClientResult",function (clientUser,clientUserRole,result,effect,catchIndex) {//www端接收成果後發送給全網
+    socket.on("ClientResult",function (clientUser,clientUserRole,result,effect,catchIndex) {//www端接收成果後發送給全網clientUserRole=玥珊的lock
       console.log("ClientResult:"+clientUser+clientUserRole+result+effect);
       socket.broadcast.emit("SupportResult",clientUser,clientUserRole,result,effect,catchIndex);
     })

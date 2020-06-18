@@ -257,8 +257,16 @@ function countDownTimer(time) {//計時器，兼處理換關處理
     {
         time--;
     }
-    else if (time===0)
+    else if (time<=0)
     {
+        for(let row=0;row<cards[chapterCount+1].length;row++)
+        {
+            if(cards[chapterCount+1][row].cardShow!==undefined)
+            {
+                cards[chapterCount+1][row].cardShow.remove();
+                cards[chapterCount+1][row].cardShow = undefined;
+            }
+        }
         time="GAME OVER";
         console.log("chapterCount:"+chapterCount);
         if(chapterCount+1>=chapterEndCount)
@@ -269,13 +277,14 @@ function countDownTimer(time) {//計時器，兼處理換關處理
         else
         {
             chapterCount++;//下一關
-            gameScreen = 0;
+            //gameScreen = 0;
             if(chapterCount+1<=chapterEndCount)
             {
                 time = chapters[chapterCount].time;
                 rightSpeed = chapters[chapterCount].rightSpeed;
                 upSpeed = chapters[chapterCount].upSpeed;
             }
+
         }
     }
     return time;

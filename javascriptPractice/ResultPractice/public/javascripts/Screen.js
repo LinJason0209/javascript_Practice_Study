@@ -25,15 +25,33 @@ let cardNormal;//卡片背面
 let tempCheck = undefined;//暫存第一次翻排
 let button;//------------------------------------------------------------------------------->
 
-let rangeWidth = 500;//布局卡片區範圍
-let rangeHeight = 300;//布局卡片區範圍
-let startRange = [370,100];//布局卡片區起始範圍，左上
+let rangeWidth = 400;//布局卡片區範圍
+let rangeHeight = 500;//布局卡片區範圍
+let startRange = [500,200];//布局卡片區起始範圍，左上
 let endRange = [750,400];//布局卡片區結束範圍，右下
 
 let bananaMassage=[];//香蕉說話圖預仔區
+let alertLLoadSupport = [];//彈跳協助者成果視窗，共8張，2張一組，所以index為2在跳
 // let kill;//測試刪除
 // let index = 0;//欲刪除的label
 ///////////////////////////////////設置場景//////////////////
+let alertMove = false;
+let alert ;
+let showLoad;
+let show;
+let showX = 1170;
+let showY = -60;
+let showList = [];
+class alertImg{//協助者成果彈跳視窗
+    constructor(src,img) {
+        this.src = src;//圖片位置
+        this.img = img;//存下圖片
+    }
+    display()
+    {
+        show = image(this.img,1170,40,400,400);
+    }
+}
 class messageData{//設置對話框模板
     constructor(index,y,w,h) {
         this.x = 0;//0/130
@@ -131,23 +149,30 @@ class cardData {//設置卡片模板
         this.cardHeight = Height;//牌卡片時設定，高
         this.cardImg = img;
         this.cardShow = undefined;//呈現卡片用物件
+        this.cardRow = 0;//卡片排版橫值
+        this.cardCol = 0;//卡片排版直值
     }
     display()
     {
         if(this.cardCheck === false)
         {
             this.cardShow = createImg('images/card_b.png');
-            this.cardShow.position(this.cardwidth, this.cardHeight);//            this.cardShow.position(190+this.ID*100, 100);
+            this.cardShow.size(this.cardwidth,this.cardHeight);
+            this.cardShow.position(startRange[0]+this.cardwidth*this.cardRow+50, startRange[1]+this.cardHeight*this.cardCol-70);//            this.cardShow.position(190+this.ID*100, 100);
         }
         else if(this.cardCheck === true)
         {
             this.cardShow = createImg(this.cardImg);
-            this.cardShow.position(this.cardwidth, this.cardHeight);//            this.cardShow.position(190+this.ID*100, 100);
+            this.cardShow.size(this.cardwidth,this.cardHeight);
+            this.cardShow.position(startRange[0]+this.cardwidth*this.cardRow+50, startRange[1]+this.cardHeight*this.cardCol-70);//            this.cardShow.position(190+this.ID*100, 100);
         }
     }
 }
+/////////////////////////////////////////////設置關卡///////////
 let chapterFirst = new chapter(1,"",10,60,30,9);//第一關
 let chapterSecond = new chapter(2,"",20,30,15,16);//第二關
+
+
 let chapters = [chapterFirst,chapterSecond];//關卡庫
 let chapterEndCount = chapters.length;//關卡總數
 let chapterCount = 0;//當前關卡///////////////新增關卡屬性值，需在index.js
@@ -199,7 +224,7 @@ let cardCount_2;//用於判斷奇偶數
             }
            // console.log("sort: "+(cardCount-1));
             //console.log("index: "+i+"chapter: "+ichapterCount+"card: "+(loadIndex+1)+"ID: "+ chapters[ichapterCount-1].card[i].ID);
-            if(loadIndex<cardCount-1)
+            if(loadIndex<cardCount-1)//成對卡牌的布置判定
             {
                 loadIndex +=1;
             }
@@ -210,6 +235,24 @@ let cardCount_2;//用於判斷奇偶數
         loadIndex =0;
         cards[ichapterCount] = chapters[ichapterCount-1].card;
          console.log("cardCount: "+(chapters[ichapterCount-1].cardCount-1)/2);
+
+        let i=0;
+        let count = chapters[ichapterCount-1].card[0].setSquare;
+        for(let row = 0;row<count;row++)//為卡片制定排版用的值
+        {
+            // console.log(" ID: "+chapters[ichapterCount-1].card[i].ID+" i: "+i+" setSquare: "+chapters[ichapterCount-1].card[i].setSquare+" row: "+row);
+            for(let col = 0;col<count;col++)//
+            {
+                //console.log(" setSquare: "+chapters[ichapterCount-1].card[i].setSquare);
+                chapters[ichapterCount-1].card[i].cardRow = row;
+                chapters[ichapterCount-1].card[i].cardCol = col;
+
+                //console.log("Chapter: " + ichapterCount+" Row: "+chapters[ichapterCount-1].card[i].cardRow+" Col: "+chapters[ichapterCount-1].card[i].cardCol+" ID: "+chapters[ichapterCount-1].card[i].ID+" i: "+i);
+                i++;
+            }
+        }
+        // console.log(i);
+        i=0;
     }
 
 //console.log("cards: "+cards[1].length);
@@ -254,6 +297,46 @@ io().on("Set",function (ClientIP,saveBase,catchIndex,QuestDataBase,AnswerDataBas
     birth = birth.replace("-",", ");
     name = joinData.joinName;//體驗者名稱
 });
+let supportResult;//協助者成果
+let supportRole;
+let supportIndex;
+let supportLock = false;
+io().on("SupportResult",function (clientUser,clientUserRole,result,effect,catchIndex)//result回傳boolen
+{
+    supportLock = true;
+    console.log(result);
+    supportRole = clientUserRole;
+    if(supportRole ===0)
+    {
+        supportIndex = 0;
+    }
+    else if(supportRole ===1){
+        supportIndex = 2;
+    }
+    else if(supportRole ===2){
+        supportIndex = 4;
+    }
+    else if(supportRole ===3){
+        supportIndex = 6;
+    }
+    if(result === true)
+    {
+        supportResult = 0;
+        timer+=10;
+    }
+    else
+    {
+        timer-=10;
+        supportResult = 1;
+        supportIndex = supportIndex+1;
+    }
+    console.log("supportIndex: "+supportIndex+"clientUserRole"+clientUserRole);
+    //  show = createImg("images/suprt_"+clientUserRole+"_"+result+".png");
+    // show.size(200,200);
+    // show.position(showX, showY);//1170, 40最終位置
+
+    //alertMove = true;
+});
 ///////////////////////////////////資訊初始化//////////////////
 ///////////////////////////////////畫面初始化//////////////////
 function centerCanvas() {//畫布置中
@@ -268,7 +351,7 @@ function canvasC() {//底層畫布
     centerCanvas();
     cnvC.background(220);
 }
-let card ;
+
 function drawCnvL() {//line對話畫面畫布
     // cnvL.background(100);
     cnvL.background(stageLoadImg[3]);
@@ -277,56 +360,14 @@ function drawCnvL() {//line對話畫面畫布
     cnvL.image(stageLoadImg[0],0,350,200,240);//畫出香蕉人
     cnvL.image(bananaMassage[chapterCount],150,450,160,80);//畫出香蕉人說話
 
-    //
-    // for(let i=0;i<chapters[chapterCount].cardCount;i++)
-    // {
-    //     cards[i] = card;
-    //     cards[i].ID = i;
-    //     cards[i].setSquare = Math.sqrt(chapters[chapterCount].cardCount);
-    //     cards[i].cardwidth = chapters[chapterCount].cardwidth;
-    //     cards[i].cardHeight = chapters[chapterCount].cardHeight;
-    // }
-    // for(let i=0;i<chapters[chapterCount].cardCount;i++)
-    // {
-    //     console.log();
-    //     if(cards[i].ID%cards[i].setSquare===0)
-    //     {
-    //         cnvL.image(cardNormal,370,100+cards[i].cardHeight*i,cards[i].cardwidth,cards[i].cardHeight);
-    //     }
-    //     else
-    //     {
-    //         cnvL.image(cardNormal,370+cards[i].cardwidth*i,100,cards[i].cardwidth,cards[i].cardHeight);
-    //     }
-    // }
     for(let row=0;row<cards[chapterCount+1].length;row++)
     {
         if(cards[chapterCount+1][row].cardShow === undefined)//卡片產生//此處判定是否有產生過牌，若有就忽視以避免重複畫圖造成的資源耗損
         {
-           // console.log(cards[chapterCount+1].length);
             cards[chapterCount+1][row].display();
-            cards[chapterCount+1][row].cardShow.position(cards[chapterCount+1][row].cardwidth*(row+1), cards[chapterCount+1][row].cardHeight*(row+1));//創卡牌時定位
-            cards[chapterCount+1][row].cardShow.cardwidth = cards[chapterCount+1][row].cardwidth*(row+1);
-            cards[chapterCount+1][row].cardShow.cardHeight = cards[chapterCount+1][row].cardHeight*(row+1);
             cards[chapterCount+1][row].cardShow.mousePressed(function () {change(chapterCount+1,row,cards[chapterCount+1][row].ID)});//監聽事件，設置好就會一直監聽，雙的function設計是為了可以傳參數
-            //console.log("Card.ID: "+cards[chapterCount+1][row].ID);
         }
     }
-    // if(cards[1][1].cardShow ===undefined)//卡片產生//此處判定是否有產生過牌，若有就忽視以避免重複畫圖造成的資源耗損(此處為測試用)
-    // {
-    //     // button = createImg('images/card_b.png');//button測試用，暫時代表呈現的卡片物件
-    //     // button.position(190, 100);
-    //     // button.mousePressed(change);
-    //     cards[1][1].display();
-    //     cards[1][1].cardShow.position(390, 100);
-    //     // card = cards[1][1];
-    //     cards[1][1].cardShow.mousePressed(function () {change(cards[1][1])});//監聽事件，設置好就會一直監聽
-    //     //  kill = cards[1][0].cardShow;
-    //     //   cards[1][0].cardShow.mousePressed(test);
-    // }
-    //     // function test() {
-    //     //     kill.remove();
-    //     //     console.log(kill);
-    //     // }////次處為測試用
     let changeLock = false;//避免未處理完又再翻牌
     function change(cardCount,row,ID) {//翻牌
         if(changeLock === false)
@@ -349,30 +390,42 @@ function drawCnvL() {//line對話畫面畫布
                 cards[cardCount][row].display();//產生翻面
                 setTimeout(function () {checkSame(cardCount,row)},500);//延遲執行
             }
-            cards[cardCount][row].cardShow.position(cards[chapterCount+1][row].cardwidth*(row+1), cards[chapterCount+1][row].cardHeight*(row+1));//翻卡牌時定位
-            cards[cardCount][row].cardShow.cardwidth = cards[chapterCount+1][row].cardwidth*(row+1);
-            cards[cardCount][row].cardShow.cardHeight = cards[chapterCount+1][row].cardHeight*(row+1);
+
         }
     }
     function checkSame(cardCount,row) {
-        console.log("tempCheck.ID: "+tempCheck[0]);
-        console.log("card.ID: "+cards[cardCount][row].ID);
+        //console.log("tempCheck.ID: "+tempCheck[0]);
+        //console.log("card.ID: "+cards[cardCount][row].ID);
         if(cards[cardCount][row].ID === tempCheck[0])//對照是否相同ID
         {
             cards[cardCount][row].cardShow.remove();//刪除第二次翻面的物件原來的圖
             cards[tempCheck[1]][tempCheck[2]].cardShow.remove();//刪除第一次翻面的物件原來的圖
             //cards[cardCount][row].cardShow = undefined;//根除原來的圖的物件
-            tempCheck = undefined;//根除原來的圖的物件
+            tempCheck = undefined;//根除暫存區的物件
             if(chapters[chapterCount].finishCount>0)
             {
                 // tint(255, 255/(chapters[chapterCount].finishCount/2));//225為0%透明，0為100%透明
                 // cnvL.image(chapters[chapterCount].goalImg,30,100,280,320);//畫出此關卡目標圖案
                 chapters[chapterCount].finishCount -= 2;//增加成功刪除的卡片數
-                console.log(".finishCount: "+chapters[chapterCount].finishCount);
+                //console.log(".finishCount: "+chapters[chapterCount].finishCount);
                 if(chapters[chapterCount].finishCount<=0)
                 {
+                    for(let row=0;row<cards[chapterCount+1].length;row++)
+                    {
+                        if(cards[chapterCount+1][row].cardShow!==undefined)
+                        {
+                            cards[chapterCount+1][row].cardShow.remove();
+                            cards[chapterCount+1][row].cardShow = undefined;
+                        }
+                    }
                     chapterCount+=1;//下一關
-                    gameScreen = 0;
+                    //gameScreen = 0;
+                    if(chapterCount+1<=chapterEndCount)
+                    {
+                        timer = chapters[chapterCount].time;
+                        rightSpeed = chapters[chapterCount].rightSpeed;
+                        upSpeed = chapters[chapterCount].upSpeed;
+                    }
                 }
             }
             else if(chapters[chapterCount].finishCount<=0)
@@ -393,62 +446,7 @@ function drawCnvL() {//line對話畫面畫布
         }
         changeLock=false;
     }
-    // if(cards[1][0].cardCheck === false)//卡片誕生器 = chapters[1].card[0].cardCheck === false
-    // {
-    //     if(button===undefined)
-    //     {
-    //         button = createImg('images/card_b.png');//button測試用，暫時代表呈現的卡片物件
-    //         button.position(190, 100);
-    //         button.mousePressed(change);
-    //
-    //     }
-    // }
-    // else
-    // {
-    //     if(button===undefined)
-    //     {
-    //         button = createImg(chapters[1].card[0].cardImg );
-    //         button.position(190, 100);
-    //
-    //     }
-    // }
-    // for(let iR=0;iR<(Math.sqrt(chapters[chapterCount].cardCount));iR++)//橫排
-    // {
-    //     for(let iC=0;iC<(Math.sqrt(chapters[chapterCount].cardCount));iC++)//直排
-    //     {
-    //         cnvL.image(cardNormal,);
-    //     }
-    // }
-    //
-    // for(let i=0;i<chapters[chapterCount].cardCount;i++)
-    // {
-    //      // for(let ir=1;ir<=Math.sqrt(chapters[chapterCount].cardCount);ir++)//橫的圖卡
-    //      // {
-    //      //      console.log("cardCount: "+Math.sqrt(chapters[chapterCount].cardCount));
-    //      //    //console.log("row: "+startRange[0]*ir);
-    //      //     cnvL.image(cardNormal,startRange[0]+chapters[chapterCount].cardwidth*ir-1,startRange[1],chapters[chapterCount].cardwidth-50,chapters[chapterCount].cardHeight);//畫出卡片 104,138，布局範圍: 左上400,100，右下750,400
-    //      //
-    //      // }
-    //      // for(let ic=1;ic<=Math.sqrt(chapters[chapterCount].cardCount);ic++)//立的圖卡
-    //      // {
-    //      //     //console.log("col: "+startRange[1]*ic);
-    //      //     cnvL.image(cardNormal,startRange[0],startRange[1]+chapters[chapterCount].cardHeight*ic-1,chapters[chapterCount].cardwidth-50,chapters[chapterCount].cardHeight);//畫出卡片 104,138，布局範圍: 左上400,100，右下750,400
-    //      // }
-    //
-    //      // cnvL.image(cardNormal,startRange[0],startRange[1],chapters[chapterCount].cardwidth-50,chapters[chapterCount].cardHeight);//畫出卡片 104,138，布局範圍: 左上400,100，右下750,400
-    //      // cnvL.image(cardNormal,endRange[0],endRange[1],chapters[chapterCount].cardwidth-50,chapters[chapterCount].cardHeight);//畫出卡片 104,138，布局範圍: 左上400,100，右下750,400
-    //  }
-    // for(let i=0;i<chapters[chapterCount].cardCount;i++)//創造按鈕化卡片
-    // {
-    //     cardButton[1] = createButton('click me');
-    //     cardButton[1].background(cardNormal);
-    //     // cardButton[i].background(chapters[chapterCount].card[i]);
-    //     cardButton[1].position(19, 19);
-    //     cardButton[1].mousePressed(check(1));//
-    // }
-    // cardNormal = createImg(100,100);//載入預設卡片之背面
-    // img.loadPixels();
-    // labelImg[0].display();//測試用，估算位置
+
 }
 function drawCnvR() {//遊戲畫面畫布
     cnvR.background(255, 100, 255);
@@ -473,6 +471,7 @@ function drawCnvR() {//遊戲畫面畫布
 
 ///////////////////////////////////畫面初始化//////////////////
 ///////////////////////////////////主程式/////////////////////
+let index=0;
 function preload() {//載入圖片進緩衝區
     // cardNormal = loadImage("images/card_b.png");//載入預設卡片之背面
     for (let i =1;i<4;i++)//載入對話圖
@@ -503,7 +502,28 @@ function preload() {//載入圖片進緩衝區
         // }
         // chapters[i].card = card;
     }
-
+    // for(let role=0;role<1;role++)//i依照談窗張數做修改loadImage("images/suprt_"+i+".png");
+    // {
+    //     for(let result=0;result<2;result++)
+    //     {
+    //         let alertImg = new alertImg();
+    //         alertImg.result[result] = loadImage("images/suprt_"+role+"_"+result+".png");
+    //     }
+    // }
+    for(let i=0;i<1;i++)//載入協助者成果
+    {
+        for(let i2=0;i2<2;i2++)
+        {
+            showLoad = new alertImg();
+            showLoad.src = "images/suprt_"+i+"_"+i2+".png";
+            showLoad.img = loadImage(showLoad.src);
+            showList[index] = showLoad;
+            index++;
+            console.log("showList: "+showList.length+"i: "+i+"i2: "+i2);
+        }
+    }
+    // let showSrc = "images/suprt_"+clientUserRole+"_"+result+".png";
+    // showLoad = loadImage(showSrc);
 }
 function change() {
     button.remove();
@@ -515,9 +535,9 @@ function setup() {
     cnvL  = createGraphics(1280, 720);
     canvasC();
     timer =  chapters[chapterCount].time;//初始化關卡時間
-    console.log("time: "+timer);
-    console.log("chapterCount"+chapterCount);
-    console.log("chapterEndCount"+chapterEndCount);
+   // console.log("time: "+timer);
+    //console.log("chapterCount"+chapterCount);
+    //console.log("chapterEndCount"+chapterEndCount);
 }
 function draw() {
     if(gameScreen===0)//依照gameScreen選擇目前呈現的畫面
@@ -535,11 +555,12 @@ function draw() {
 }
 ///////////////////////////////主程式//////////////////
 function initScreen() {//初始確認畫面
+
     background(220);
     textAlign(CENTER);                 //文本置中
     fill(52, 73, 94);                  //文本顏色
     textSize(70);                     //文字大小
-    text("救贖之路"+"第 "+(chapterCount+1)+" 關", width/2, height/2);
+    text("救贖之路第一關", width/2, height/2);
 
     fill(92,167,182);//R,G,B,[A]
     noStroke();
@@ -561,7 +582,7 @@ function playScreen() {//遊戲中畫面
     textSize(30);
     text("00:"+timer, width/2, height-620);//布置計時器
 
-    for(let i=0;i<labelImg.length;i++)
+    for(let i=0;i<labelImg.length;i++)//顯示分頁
     {
             labelImg[i].display();
         if(frameCount%rightSpeed===0)//timer%rightSpeed ===0
@@ -577,10 +598,43 @@ function playScreen() {//遊戲中畫面
         let index = labelRandom();
         labelImg[labelImg.length] = setLabel = new labelData(index,200, 150,35);
     }
-    if(gameCondition)//當遊戲確認結束時呈現結束畫面
+
+
+    if(gameCondition)
     {
         gameScreen = 2;
     }
+    /////////////////////////////當協助者有成果時
+    console.log("supportIndex: "+supportIndex);
+    if(supportIndex!==undefined && supportLock===true)
+    {
+        if(showY <60)
+        {
+            showY  +=1;
+            image(showList[supportIndex].img,1050,showY ,200,200);
+        }
+        else if(showY <61)
+        {
+            showY  +=0.01*3;
+            image(showList[supportIndex].img,1050,showY ,200,200);
+        }
+        else
+        {
+            showY = -60;
+            supportLock = false;
+        }
+    }
+    // show = image(showLoad,1170,40,400,400);
+    // if(showY <= 40)
+    // {
+    //     show.y+=1;
+    //     // show.position(showX, showY);
+    // }
+    // else
+    //     {
+    //         alertMove = true;
+    //     }
+    //show.position(1170, 40);//1170, 40最終位置
 }
 function gameOverScreen() {//結束畫面
     background(0);
